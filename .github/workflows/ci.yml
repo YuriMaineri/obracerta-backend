@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  migrations:
+    name: Checar migrations
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Nomes, versões e imutabilidade
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
+        run: bash .github/scripts/check-migrations.sh "$BASE"
+
+  test:
+    name: Testes (unitários, modularidade e PostgreSQL)
+    runs-on: ubuntu-latest
+    needs: migrations
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: mvn verify
+        run: ./mvnw -B -ntp verify
+
+      - name: Relatórios de teste
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: surefire-reports
+          path: target/surefire-reports/
+
+      - name: Diagramas de arquitetura
+        if: success()
+        uses: actions/upload-artifact@v7
+        with:
+          name: spring-modulith-docs
+          path: target/spring-modulith-docs/
