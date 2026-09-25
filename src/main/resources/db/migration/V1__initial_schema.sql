@@ -1,9 +1,3 @@
--- ObraCerta - esquema inicial
--- Fatia 1: empresa, clientes e orcamento com itens em texto livre.
--- As tabelas de catalogo ja nascem aqui, mas serao preenchidas aos poucos
--- pela propria interface, servico a servico.
--- Nomes em ingles; os comentarios trazem o termo de negocio em portugues.
-
 -- =========================================================
 -- MODULO: company (empresa)
 -- =========================================================
@@ -32,8 +26,6 @@ create table bank_account (
     active          boolean      not null default true
 );
 
--- Clausulas: garantia, normas regulamentadoras, servicos extras, condicoes de
--- pagamento. Textos hoje redigitados em todo orcamento.
 create table clause (
     id          bigint generated always as identity primary key,
     company_id  bigint       not null references company (id),
@@ -65,7 +57,6 @@ create table customer (
 
 create index idx_customer_name on customer (lower(name));
 
--- Obra: local onde o servico e executado.
 create table job_site (
     id           bigint generated always as identity primary key,
     customer_id  bigint       not null references customer (id),
@@ -77,7 +68,6 @@ create table job_site (
 -- =========================================================
 -- MODULO: catalog (catalogo, preenchido gradualmente pelo usuario)
 -- =========================================================
--- Insumo
 create table material (
     id          bigint generated always as identity primary key,
     name        varchar(200)   not null,
@@ -88,7 +78,6 @@ create table material (
     active      boolean        not null default true
 );
 
--- Historico de preco do insumo
 create table material_price_history (
     id              bigint generated always as identity primary key,
     material_id     bigint         not null references material (id),
@@ -96,7 +85,6 @@ create table material_price_history (
     effective_date  date           not null
 );
 
--- Servico
 create table service (
     id                    bigint generated always as identity primary key,
     name                  varchar(200) not null,
@@ -110,7 +98,6 @@ create table service (
     active                boolean      not null default true
 );
 
--- Composicao: quanto de cada insumo o servico consome por unidade.
 create table service_material (
     id                 bigint generated always as identity primary key,
     service_id         bigint         not null references service (id) on delete cascade,
@@ -140,8 +127,6 @@ create table estimate (
     created_at               timestamptz  not null default now()
 );
 
--- Bloco do orcamento. Um orcamento nao e um total unico: ele tem blocos
--- obrigatorios, opcionais e alternativos entre si (com ou sem pintura das grades).
 create table estimate_section (
     id                 bigint generated always as identity primary key,
     estimate_id        bigint       not null references estimate (id) on delete cascade,
@@ -151,7 +136,6 @@ create table estimate_section (
     sort_order         int          not null default 0
 );
 
--- Ambiente (sala, banheiro, fachada...)
 create table area (
     id          bigint generated always as identity primary key,
     section_id  bigint       not null references estimate_section (id) on delete cascade,
@@ -185,8 +169,6 @@ create table estimate_material (
     source       varchar(20)    not null default 'MANUAL'   -- CALCULATED / MANUAL
 );
 
--- Exclusoes: "Nao incluso os ventiladores", "nao contempla luminarias". Aparece
--- em quase todos os orcamentos reais e hoje e digitado a mao.
 create table exclusion (
     id           bigint generated always as identity primary key,
     estimate_id  bigint not null references estimate (id) on delete cascade,
@@ -194,8 +176,6 @@ create table exclusion (
     sort_order   int    not null default 0
 );
 
--- Notas internas: recados tecnicos que hoje vazam para o documento do cliente,
--- em vermelho. Aqui ficam separados e so aparecem na visao interna.
 create table internal_note (
     id           bigint generated always as identity primary key,
     estimate_id  bigint not null references estimate (id) on delete cascade,
