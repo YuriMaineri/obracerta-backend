@@ -51,6 +51,19 @@ class CustomerControllerTest {
     }
 
     @Test
+    void invalidEmailReturns400WithFieldMessage() {
+        var response = mvc.post().uri("/api/customers")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"personType":"COMPANY","name":"Cartorio","email":"joao@empresa"}
+                        """)
+                .exchange();
+
+        assertThat(response).hasStatus(400);
+        assertThat(response).bodyJson().extractingPath("$.detail").isEqualTo("E-mail invalido");
+    }
+
+    @Test
     void unknownCustomerReturns404() {
         given(service.findById(99L)).willThrow(new NoSuchElementException("Cliente nao encontrado: 99"));
 
