@@ -1,0 +1,16 @@
+/Users/firedev/Documents/projetos/senac/obracerta/backend/src/main/java/br/com/obracerta/ObraCertaApplication.java
+/Users/firedev/Documents/projetos/senac/obracerta/backend/src/main/java/br/com/obracerta/catalog/package-info.java
+/Users/firedev/Documents/projetos/senac/obracerta/backend/src/main/java/br/com/obracerta/company/package-info.java
+/Users/firedev/Documents/projetos/senac/obracerta/backend/src/main/java/br/com/obracerta/customers/Customer.java
+/Users/firedev/Documents/projetos/senac/obracerta/backend/src/main/java/br/com/obracerta/customers/CustomerController.java
+/Users/firedev/Documents/projetos/senac/obracerta/backend/src/main/java/br/com/obracerta/customers/CustomerRequest.java
+/Users/firedev/Documents/projetos/senac/obracerta/backend/src/main/java/br/com/obracerta/customers/CustomerService.java
+/Users/firedev/Documents/projetos/senac/obracerta/backend/src/main/java/br/com/obracerta/customers/internal/CustomerRepository.java
+/Users/firedev/Documents/projetos/senac/obracerta/backend/src/main/java/br/com/obracerta/customers/package-info.java
+/Users/firedev/Documents/projetos/senac/obracerta/backend/src/main/java/br/com/obracerta/estimate/package-info.java
+/Users/firedev/Documents/projetos/senac/obracerta/backend/src/main/java/br/com/obracerta/proposal/package-info.java
+/Users/firedev/Documents/projetos/senac/obracerta/backend/src/main/java/br/com/obracerta/shared/MaterialSupply.java
+/Users/firedev/Documents/projetos/senac/obracerta/backend/src/main/java/br/com/obracerta/shared/PricingMode.java
+/Users/firedev/Documents/projetos/senac/obracerta/backend/src/main/java/br/com/obracerta/shared/Unit.java
+/Users/firedev/Documents/projetos/senac/obracerta/backend/src/main/java/br/com/obracerta/shared/package-info.java
+/Users/firedev/Documents/projetos/senac/obracerta/backend/src/main/java/br/com/obracerta/shared/web/ApiExceptionHandler.java
