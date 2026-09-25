@@ -1,0 +1,45 @@
+# Build do Maven
+target/
+!.mvn/wrapper/maven-wrapper.properties
+
+# Maven Wrapper: o mvnw baixa o Maven sozinho; nao versionar o jar se aparecer
+.mvn/wrapper/maven-wrapper.jar
+
+# Logs
+*.log
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# Eclipse / STS
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+bin/
+
+# VS Code
+.vscode/
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# Configuracao local (credenciais que nao devem subir)
+application-local.yml
+application-local.properties
+.env
+
+# Sistema
+.DS_Store
+Thumbs.db

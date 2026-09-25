@@ -1,9 +1,0 @@
-[%autowidth.stretch, cols="h,a"]
-|===
-|Description
-|Tipos compartilhados por todos os modulos: enums e objetos de valor do dominio.  
-+
-E um modulo aberto: seus subpacotes podem ser acessados livremente. Por isso, so entra aqui o que for realmente transversal e estavel. Regra pratica: se o tipo pertence a um unico modulo, ele nao mora aqui.
-|Base package
-|`br.com.obracerta.shared`
-|===
