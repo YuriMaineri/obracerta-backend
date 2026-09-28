@@ -18,8 +18,10 @@ class CustomerController {
     }
 
     @GetMapping
-    Page<CustomerResponse> search(@RequestParam(required = false) String query, Pageable pageable) {
-        return service.search(query, pageable).map(CustomerResponse::from);
+    Page<CustomerResponse> search(@RequestParam(required = false) String query,
+                                  @RequestParam(required = false) Customer.PersonType personType,
+                                  Pageable pageable) {
+        return service.search(query, personType, pageable).map(CustomerResponse::from);
     }
 
     @GetMapping("/{id}")

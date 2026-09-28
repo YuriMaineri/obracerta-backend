@@ -13,4 +13,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
     Page<Customer> findByActiveTrueAndNameContainingIgnoreCase(String name, Pageable pageable);
+
+    Page<Customer> findByActiveTrueAndPersonTypeAndNameContainingIgnoreCase(
+            Customer.PersonType personType, String name, Pageable pageable);
 }

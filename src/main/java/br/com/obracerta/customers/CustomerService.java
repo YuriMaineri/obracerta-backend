@@ -22,9 +22,11 @@ public class CustomerService {
         this.repository = repository;
     }
 
-    public Page<Customer> search(String query, Pageable pageable) {
+    public Page<Customer> search(String query, Customer.PersonType personType, Pageable pageable) {
         String term = query == null ? "" : query.trim();
-        return repository.findByActiveTrueAndNameContainingIgnoreCase(term, pageable);
+        return personType == null
+                ? repository.findByActiveTrueAndNameContainingIgnoreCase(term, pageable)
+                : repository.findByActiveTrueAndPersonTypeAndNameContainingIgnoreCase(personType, term, pageable);
     }
 
     public Customer findById(Long id) {
@@ -55,10 +57,10 @@ public class CustomerService {
     }
 
     private static void applyContactAndAddress(Customer customer, CustomerRequest request) {
-        customer.updateContact(blankToNull(request.contactPerson()), normalizePhone(request.phone()),
+        customer.updateContact(blankToNull(request.contactPerson()), BrazilianDocuments.normalizePhone(request.phone()),
                 request.email() == null || request.email().isBlank() ? null : request.email().trim().toLowerCase());
         customer.updateAddress(blankToNull(request.address()), blankToNull(request.district()),
-                blankToNull(request.city()), normalizePostalCode(request.postalCode()));
+                blankToNull(request.city()), BrazilianDocuments.normalizePostalCode(request.postalCode()));
     }
 
     /**
@@ -81,30 +83,6 @@ public class CustomerService {
         boolean valid = individual ? BrazilianDocuments.isValidCpf(digits) : BrazilianDocuments.isValidCnpj(digits);
         if (!valid) {
             throw new IllegalArgumentException("%s invalido: %s".formatted(label, taxId));
-        }
-        return digits;
-    }
-
-    /** Telefone com DDD: 10 digitos (fixo) ou 11 (celular). Guardado so com digitos. */
-    static String normalizePhone(String phone) {
-        String digits = BrazilianDocuments.digitsOnly(phone);
-        if (digits.isEmpty()) {
-            return null;
-        }
-        if (digits.length() != 10 && digits.length() != 11) {
-            throw new IllegalArgumentException("Telefone deve ter DDD e 8 ou 9 digitos, recebido: " + phone);
-        }
-        return digits;
-    }
-
-    /** CEP com 8 digitos. Guardado so com digitos. */
-    static String normalizePostalCode(String postalCode) {
-        String digits = BrazilianDocuments.digitsOnly(postalCode);
-        if (digits.isEmpty()) {
-            return null;
-        }
-        if (digits.length() != 8) {
-            throw new IllegalArgumentException("CEP deve ter 8 digitos, recebido: " + postalCode);
         }
         return digits;
     }

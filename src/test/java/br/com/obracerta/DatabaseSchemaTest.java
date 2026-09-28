@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Pageable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -40,5 +41,17 @@ class DatabaseSchemaTest {
         assertThat(found.getTaxId()).isEqualTo("24839705000165");
         assertThat(found.getPhone()).isEqualTo("5133334444");
         assertThat(found.getPostalCode()).isEqualTo("90020000");
+    }
+
+    @Test
+    void searchFiltersByPersonType() {
+        customerService.create(new CustomerRequest(Customer.PersonType.INDIVIDUAL, "Sr. Bernardo Santos", null,
+                null, null, null, null, null, "Porto Alegre", null));
+
+        var individuals = customerService.search("Bernardo", Customer.PersonType.INDIVIDUAL, Pageable.unpaged());
+        var companies = customerService.search("Bernardo", Customer.PersonType.COMPANY, Pageable.unpaged());
+
+        assertThat(individuals.getContent()).extracting(Customer::getName).contains("Sr. Bernardo Santos");
+        assertThat(companies.getContent()).isEmpty();
     }
 }

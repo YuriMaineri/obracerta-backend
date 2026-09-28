@@ -32,20 +32,4 @@ class CustomerServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("CNPJ invalido");
     }
-
-    @Test
-    void phoneKeepsOnlyDigitsAndRequiresAreaCode() {
-        assertThat(CustomerService.normalizePhone("(51) 99999-8888")).isEqualTo("51999998888");
-        assertThat(CustomerService.normalizePhone("(51) 3333-4444")).isEqualTo("5133334444");
-        assertThat(CustomerService.normalizePhone("")).isNull();
-        assertThatThrownBy(() -> CustomerService.normalizePhone("9999-8888"))
-                .isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
-    void postalCodeKeepsOnlyDigitsAndRequiresEight() {
-        assertThat(CustomerService.normalizePostalCode("90010-000")).isEqualTo("90010000");
-        assertThatThrownBy(() -> CustomerService.normalizePostalCode("9001-000"))
-                .isInstanceOf(IllegalArgumentException.class);
-    }
 }

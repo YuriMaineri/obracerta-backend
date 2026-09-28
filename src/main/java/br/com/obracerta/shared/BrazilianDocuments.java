@@ -32,6 +32,42 @@ public final class BrazilianDocuments {
                 && cnpjCheckDigit(d, 13) == d.charAt(13) - '0';
     }
 
+    /** Telefone com DDD (10 ou 11 digitos), guardado so com digitos. Vazio vira null. */
+    public static String normalizePhone(String phone) {
+        String digits = digitsOnly(phone);
+        if (digits.isEmpty()) {
+            return null;
+        }
+        if (digits.length() != 10 && digits.length() != 11) {
+            throw new IllegalArgumentException("Telefone deve ter DDD e 8 ou 9 digitos, recebido: " + phone);
+        }
+        return digits;
+    }
+
+    /** CEP com 8 digitos, guardado so com digitos. Vazio vira null. */
+    public static String normalizePostalCode(String postalCode) {
+        String digits = digitsOnly(postalCode);
+        if (digits.isEmpty()) {
+            return null;
+        }
+        if (digits.length() != 8) {
+            throw new IllegalArgumentException("CEP deve ter 8 digitos, recebido: " + postalCode);
+        }
+        return digits;
+    }
+
+    /** CNPJ obrigatoriamente valido, guardado so com digitos. Vazio vira null. */
+    public static String normalizeCnpj(String cnpj) {
+        String digits = digitsOnly(cnpj);
+        if (digits.isEmpty()) {
+            return null;
+        }
+        if (!isValidCnpj(digits)) {
+            throw new IllegalArgumentException("CNPJ invalido: " + cnpj);
+        }
+        return digits;
+    }
+
     private static int cpfCheckDigit(String d, int length) {
         int sum = 0;
         for (int i = 0; i < length; i++) {
