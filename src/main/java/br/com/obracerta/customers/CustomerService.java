@@ -7,7 +7,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * API do modulo de clientes. E por aqui que os demais modulos conversam com este.
@@ -32,6 +36,10 @@ public class CustomerService {
     public Customer findById(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Cliente nao encontrado: " + id));
+    }
+
+    public Map<Long, Customer> findAllByIds(Collection<Long> ids) {
+        return repository.findAllById(ids).stream().collect(Collectors.toMap(Customer::getId, Function.identity()));
     }
 
     @Transactional

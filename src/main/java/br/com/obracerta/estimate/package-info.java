@@ -9,5 +9,5 @@
  */
 @org.springframework.modulith.ApplicationModule(
         displayName = "Estimate",
-        allowedDependencies = {"shared", "customers", "catalog"})
+        allowedDependencies = {"shared", "customers", "catalog", "company"})
 package br.com.obracerta.estimate;
