@@ -168,7 +168,7 @@ public class EstimateService {
     private EstimateDetails toDetails(Estimate e) {
         Customer c = customers.findById(e.getCustomerId());
         var customer = new EstimateDetails.CustomerSummary(c.getId(), c.getName(), c.getPersonType().name(),
-                c.getTaxId(), c.getContactPerson(), c.getAddress(), c.getDistrict(), c.getCity());
+                c.getTaxId(), c.getContactPerson(), c.getAddress(), c.getDistrict(), c.getCity(), c.getPostalCode());
         return new EstimateDetails(e.getId(), e.getNumber(), e.getStatus(), customer, e.getTitle(), e.getIssueDate(),
                 e.getValidityDays(), e.getMinLeadDays(), e.getMaxLeadDays(), e.getMaterialSupply(),
                 e.getEstimatedMaterialCost(), e.getPaymentTerms(), e.getBankAccountId(), Set.copyOf(e.getClauseIds()),

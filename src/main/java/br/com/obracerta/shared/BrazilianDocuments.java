@@ -68,6 +68,34 @@ public final class BrazilianDocuments {
         return digits;
     }
 
+    /** CNPJ ou CPF formatado conforme a quantidade de dígitos; outros valores voltam como estão. */
+    public static String formatTaxId(String taxId) {
+        String d = digitsOnly(taxId);
+        if (d.length() == 14) {
+            return "%s.%s.%s/%s-%s".formatted(d.substring(0, 2), d.substring(2, 5), d.substring(5, 8), d.substring(8, 12), d.substring(12));
+        }
+        if (d.length() == 11) {
+            return "%s.%s.%s-%s".formatted(d.substring(0, 3), d.substring(3, 6), d.substring(6, 9), d.substring(9));
+        }
+        return taxId;
+    }
+
+    public static String formatPhone(String phone) {
+        String d = digitsOnly(phone);
+        if (d.length() == 11) {
+            return "(%s) %s-%s".formatted(d.substring(0, 2), d.substring(2, 7), d.substring(7));
+        }
+        if (d.length() == 10) {
+            return "(%s) %s-%s".formatted(d.substring(0, 2), d.substring(2, 6), d.substring(6));
+        }
+        return phone;
+    }
+
+    public static String formatPostalCode(String postalCode) {
+        String d = digitsOnly(postalCode);
+        return d.length() == 8 ? d.substring(0, 5) + "-" + d.substring(5) : postalCode;
+    }
+
     private static int cpfCheckDigit(String d, int length) {
         int sum = 0;
         for (int i = 0; i < length; i++) {

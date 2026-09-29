@@ -53,4 +53,13 @@ class BrazilianDocumentsTest {
         assertThatThrownBy(() -> BrazilianDocuments.normalizeCnpj("24.839.705/0001-66"))
                 .isInstanceOf(IllegalArgumentException.class);
     }
+
+    @Test
+    void formatsDocumentsPhoneAndPostalCode() {
+        assertThat(BrazilianDocuments.formatTaxId("24839705000165")).isEqualTo("24.839.705/0001-65");
+        assertThat(BrazilianDocuments.formatTaxId("52998224725")).isEqualTo("529.982.247-25");
+        assertThat(BrazilianDocuments.formatPhone("51984232827")).isEqualTo("(51) 98423-2827");
+        assertThat(BrazilianDocuments.formatPhone("5133334444")).isEqualTo("(51) 3333-4444");
+        assertThat(BrazilianDocuments.formatPostalCode("90420090")).isEqualTo("90420-090");
+    }
 }

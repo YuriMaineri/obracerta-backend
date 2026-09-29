@@ -32,7 +32,7 @@ public record EstimateDetails(
         Instant updatedAt) {
 
     public record CustomerSummary(Long id, String name, String personType, String taxId, String contactPerson,
-                                  String address, String district, String city) {
+                                  String address, String district, String city, String postalCode) {
     }
 
     public record Service(String description, String internalNote) {

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <title th:text="'Orçamento ' + ${p.number}">Orçamento</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 40pt 48pt 56pt 48pt;
+      @bottom-left { content: element(footer); }
+      @bottom-right {
+        content: "Página " counter(page) " de " counter(pages);
+        font-family: 'Libre Franklin', sans-serif; font-size: 8pt; color: #7a8591;
+        vertical-align: top; padding-top: 14pt;
+      }
+    }
+    body {
+      margin: 0;
+      font-family: 'Libre Franklin', sans-serif;
+      font-size: 10.5pt;
+      line-height: 15pt;
+      color: #1d2733;
+    }
+    table { border-collapse: collapse; width: 100%; }
+    td, th { padding: 0; vertical-align: top; text-align: left; font-weight: normal; }
+    p { margin: 0; }
+
+    .footer { position: running(footer); font-size: 8pt; line-height: 11pt; color: #7a8591; padding-top: 14pt; border-top: 0.75pt solid #d5dbe2; }
+
+    /* Cabeçalho */
+    .head td { vertical-align: middle; }
+    .logo { width: 150pt; height: 71pt; }
+    .company-name { font-size: 17pt; line-height: 20pt; font-weight: 500; }
+    .company { text-align: right; font-size: 9pt; line-height: 13pt; color: #4b5663; }
+    .company strong { display: block; font-weight: 500; font-size: 10pt; color: #1d2733; }
+    .rule { height: 3pt; background: #1f5f99; margin: 14pt 0 0 0; }
+
+    /* Título */
+    .title { margin-top: 22pt; }
+    .title td { vertical-align: bottom; }
+    .kicker { font-size: 8pt; line-height: 10pt; letter-spacing: 1.2pt; text-transform: uppercase; color: #1f5f99; font-weight: 500; }
+    h1 { margin: 2pt 0 0 0; font-size: 26pt; line-height: 28pt; font-weight: 500; }
+    .meta { text-align: right; font-size: 9pt; line-height: 13pt; color: #4b5663; }
+    .meta strong { font-weight: 500; color: #1d2733; }
+
+    /* Cliente */
+    .client { margin-top: 16pt; background: #f2f5f8; }
+    .client td { padding: 12pt 14pt; width: 50%; }
+    .client td + td { border-left: 0.75pt solid #d5dbe2; }
+    .label { font-size: 7.5pt; line-height: 10pt; letter-spacing: 1pt; text-transform: uppercase; color: #6a7684; font-weight: 500; margin-bottom: 3pt; }
+    .client-name { font-size: 12pt; line-height: 16pt; font-weight: 500; }
+    .client .line { font-size: 9.5pt; line-height: 13.5pt; color: #3b4652; }
+    .object { margin-top: 8pt; }
+    .object .value { font-size: 11pt; font-weight: 500; }
+
+    /* Seções */
+    .section { margin-top: 20pt; page-break-inside: avoid; }
+    h2 { margin: 0 0 8pt 0; padding-bottom: 5pt; border-bottom: 0.75pt solid #d5dbe2; font-size: 9pt; line-height: 12pt; letter-spacing: 1.2pt; text-transform: uppercase; font-weight: 500; color: #1d2733; page-break-after: avoid; }
+    h2 .n { color: #1f5f99; margin-right: 6pt; }
+    ul { margin: 0; padding: 0 0 0 13pt; }
+    li { margin: 0 0 3pt 0; }
+    .soft li { color: #3b4652; }
+
+    /* Tabelas de valores */
+    .items td { padding: 5pt 0; border-bottom: 0.5pt solid #e6eaef; }
+    .items td.amount { text-align: right; white-space: nowrap; width: 110pt; }
+    .items tr.subtotal td { border-bottom: none; padding-top: 7pt; font-weight: 500; }
+    .note { margin-top: 6pt; font-size: 9pt; line-height: 13pt; color: #4b5663; }
+
+    .total { margin-top: 10pt; background: #1f5f99; color: #ffffff; }
+    .total td { padding: 10pt 14pt; vertical-align: middle; }
+    .total .t-label { font-size: 8.5pt; letter-spacing: 1.2pt; text-transform: uppercase; font-weight: 500; }
+    .total .t-value { text-align: right; font-size: 17pt; line-height: 20pt; font-weight: 500; white-space: nowrap; }
+
+    .lead { font-size: 12pt; font-weight: 500; }
+
+    /* Assinatura */
+    .sign { margin-top: 34pt; page-break-inside: avoid; }
+    .sign td { vertical-align: bottom; }
+    .sign .place { color: #3b4652; }
+    .sign .line-box { width: 230pt; }
+    .sign .sig-line { border-top: 0.75pt solid #1d2733; padding-top: 5pt; }
+    .sign .who { font-weight: 500; }
+    .sign .ids { font-size: 9pt; line-height: 13pt; color: #4b5663; }
+
+    /* Normas */
+    .norms { margin-top: 26pt; padding: 12pt 14pt; border: 0.75pt solid #d5dbe2; page-break-inside: avoid; }
+    .norms p { font-size: 8.5pt; line-height: 12pt; color: #3b4652; margin-top: 4pt; }
+    .norms p strong { font-weight: 500; color: #1d2733; }
+
+    @media screen {
+      html { background: #d9dde2; }
+      body { width: 210mm; min-height: 297mm; margin: 24px auto; padding: 40pt 48pt 56pt; box-sizing: border-box; background: #fff; box-shadow: 0 4px 20px rgba(0,0,0,.15); display: flex; flex-direction: column; }
+      .footer { order: 99; margin-top: 32pt; }
+      .company-name { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Rodapé repetido em todas as páginas (running element — precisa vir antes do conteúdo) -->
+<div class="footer">
+  <span th:text="${p.companyName}">Maineri Elétrica, Construções e Reformas</span>
+  <span th:if="${p.companyTaxId}" th:text="' · CNPJ ' + ${p.companyTaxId}"> · CNPJ 24.839.705/0001-65</span>
+  <span th:if="${p.companyPhone}" th:text="' · ' + ${p.companyPhone}"> · (51) 98423-2827</span>
+</div>
+
+<table class="head">
+  <tr>
+    <td>
+      <img class="logo" th:if="${p.logoDataUri}" th:src="${p.logoDataUri}" src="../assets/logo-maineri.png" alt="Logotipo"/>
+      <div class="company-name" th:unless="${p.logoDataUri}" th:text="${p.companyName}">Empresa</div>
+    </td>
+    <td class="company">
+      <strong th:text="${p.companyName}">Maineri Elétrica, Construções e Reformas</strong>
+      <div th:if="${p.companyTaxId}" th:text="'CNPJ ' + ${p.companyTaxId}">CNPJ 24.839.705/0001-65</div>
+      <div th:if="${p.companyPhone}" th:text="${p.companyPhone}">(51) 98423-2827</div>
+    </td>
+  </tr>
+</table>
+<div class="rule"></div>
+
+<table class="title">
+  <tr>
+    <td>
+      <div class="kicker">Proposta comercial</div>
+      <h1>Orçamento</h1>
+    </td>
+    <td class="meta">
+      <div>Nº <strong th:text="${p.number}">0014/2026</strong></div>
+      <div>Emitido em <strong th:text="${p.issueDate}">28/09/2026</strong></div>
+    </td>
+  </tr>
+</table>
+
+<table class="client">
+  <tr>
+    <td>
+      <div class="label">Cliente</div>
+      <div class="client-name" th:text="${p.customerName}">Yuri Maineri</div>
+      <div class="line" th:if="${p.customerDocument}" th:text="${p.customerDocument}">CPF: 018.821.590-55</div>
+      <div class="line" th:if="${p.customerContact}" th:text="${p.customerContact}">A/C Yuri</div>
+      <div class="object" th:if="${p.title}">
+        <div class="label">Objeto</div>
+        <div class="value" th:text="${p.title}">Reforma cozinha</div>
+      </div>
+    </td>
+    <td>
+      <div class="label">Local da obra</div>
+      <div class="line" th:each="line : ${p.customerAddress}" th:text="${line}">Rua Tasdas, 120</div>
+      <div class="line" th:remove="all">Bairro: Teste. Porto Alegre.</div>
+      <div class="line" th:remove="all">CEP: 90660-130</div>
+    </td>
+  </tr>
+</table>
+
+<div class="section" th:if="${!p.services.isEmpty()}">
+  <h2><span class="n">01</span>Serviço a ser executado</h2>
+  <ul>
+    <li th:each="s : ${p.services}" th:text="${s}">Remover armários antigos</li>
+    <li th:remove="all">Remover azulejos</li>
+  </ul>
+</div>
+
+<div class="section" th:if="${!p.materialItems.isEmpty() or p.materialNote != null}">
+  <h2><span class="n">02</span>Material a ser usado</h2>
+  <table class="items" th:if="${!p.materialItems.isEmpty()}">
+    <tr th:each="m : ${p.materialItems}">
+      <td th:text="${m.description}">Azulejo</td>
+      <td class="amount" th:text="${m.amount}">R$ 200,00</td>
+    </tr>
+    <tr th:remove="all"><td>Argamassa</td><td class="amount">R$ 50,00</td></tr>
+    <tr th:remove="all"><td>Rejunte</td><td class="amount">R$ 95,00</td></tr>
+    <tr class="subtotal" th:if="${p.materialTotal}">
+      <td>Total de material</td>
+      <td class="amount" th:text="${p.materialTotal}">R$ 345,00</td>
+    </tr>
+  </table>
+  <p class="note" th:if="${p.materialNote}" th:text="${p.materialNote}"></p>
+</div>
+
+<div class="section" th:if="${!p.priceItems.isEmpty()}">
+  <h2><span class="n">03</span>Valor da mão de obra e material</h2>
+  <table class="items">
+    <tr th:each="v : ${p.priceItems}">
+      <td th:text="${v.description}">Mão de obra</td>
+      <td class="amount" th:text="${v.amount}">R$ 857,00</td>
+    </tr>
+    <tr th:remove="all"><td>Material</td><td class="amount">R$ 345,00</td></tr>
+  </table>
+  <table class="total" th:if="${p.grandTotal}">
+    <tr>
+      <td class="t-label">Total do orçamento</td>
+      <td class="t-value" th:text="${p.grandTotal}">R$ 1.202,00</td>
+    </tr>
+  </table>
+</div>
+
+<div class="section" th:if="${p.leadTime}">
+  <h2><span class="n">04</span>Tempo de execução do serviço</h2>
+  <p class="lead" th:text="${p.leadTime}">3 a 17 dias úteis</p>
+</div>
+
+<div class="section soft" th:if="${!p.payment.isEmpty()}">
+  <h2><span class="n">05</span>Forma de pagamento</h2>
+  <ul>
+    <li th:each="line : ${p.payment}" th:text="${line}">Mão de obra 50% no início do serviço e 50% na entrega.</li>
+    <li th:remove="all">Depósito bancário, SICREDI agência 0116 conta corrente jurídica 56780-7 CNPJ 24.839.705/0001-65. Carlos Alberto Maineri da Silva.</li>
+    <li th:remove="all">Com cartão de crédito encargos por conta do cliente.</li>
+  </ul>
+</div>
+
+<div class="section soft" th:if="${!p.warranty.isEmpty()}">
+  <h2><span class="n">06</span>Garantia</h2>
+  <ul><li th:each="line : ${p.warranty}" th:text="${line}">Garantia sobre o serviço executado.</li></ul>
+</div>
+
+<div class="section soft" th:if="${!p.observations.isEmpty()}">
+  <h2><span class="n">07</span>Observações</h2>
+  <ul>
+    <li th:each="line : ${p.observations}" th:text="${line}">Serviços extras e problemas que vierem ocorrer durante a execução do trabalho, que não estejam relacionados no orçamento, será cobrado a parte, mas antes será comunicado ao cliente.</li>
+    <li th:remove="all">Preciso um lugar, para que os colaboradores possam trocar de roupa e ter onde almoçar.</li>
+    <li th:remove="all">Para execução das passagens da fiação, deverá estar toda infra interna de tubulação pronta e de fácil acesso, livre de obstruções.</li>
+    <li th:remove="all">Tem que ter ar condicionado.</li>
+  </ul>
+</div>
+
+<table class="sign">
+  <tr>
+    <td class="place" th:text="${p.placeAndDate}">Porto Alegre, 28/09/2026.</td>
+    <td class="line-box">
+      <div class="sig-line">
+        <div class="who" th:text="${p.signatory}">Carlos Maineri</div>
+        <div class="ids" th:if="${p.companyTaxId}" th:text="'CNPJ ' + ${p.companyTaxId}">CNPJ 24.839.705/0001-65</div>
+        <div class="ids" th:if="${p.companyPhone}" th:text="'Fone: ' + ${p.companyPhone}">Fone: (51) 98423-2827</div>
+      </div>
+    </td>
+  </tr>
+</table>
+
+<div class="norms" th:if="${!p.regulatory.isEmpty()}">
+  <div class="label">Empresa com normas regulamentadoras</div>
+  <p th:each="line : ${p.regulatory}" th:text="${line}">NR-10 – Segurança em Instalações e Serviços em Eletricidade.</p>
+  <p th:remove="all">NR 18 estabelece diretrizes de administração, de planejamento e de organização, relacionadas ao setor da construção civil.</p>
+  <p th:remove="all">NR-33 é uma norma para trabalhos confinados.</p>
+</div>
+
+</body>
+</html>

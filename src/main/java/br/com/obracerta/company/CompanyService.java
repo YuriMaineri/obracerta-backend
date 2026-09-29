@@ -7,6 +7,8 @@ import br.com.obracerta.shared.BrazilianDocuments;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -76,6 +78,12 @@ public class CompanyService {
                 .orElseThrow(() -> new NoSuchElementException("Conta bancaria nao encontrada: " + id));
     }
 
+    /** Inclui contas removidas: orçamentos antigos continuam mostrando a conta que usaram. */
+    public Optional<BankAccount> findBankAccountForDocument(Long id) {
+        Long companyId = getCompany().getId();
+        return bankAccounts.findById(id).filter(a -> a.getCompanyId().equals(companyId));
+    }
+
     @Transactional
     public BankAccount createBankAccount(BankAccountRequest request) {
         Long companyId = getCompany().getId();
@@ -108,6 +116,15 @@ public class CompanyService {
 
     public List<Clause> listClauses() {
         return clauses.findByCompanyIdAndActiveTrueOrderByTypeAscSortOrderAscTitleAsc(getCompany().getId());
+    }
+
+    /** Inclui cláusulas removidas, pelo mesmo motivo de findBankAccountForDocument. */
+    public List<Clause> findClausesForDocument(Collection<Long> ids) {
+        Long companyId = getCompany().getId();
+        return clauses.findAllById(ids).stream()
+                .filter(c -> c.getCompanyId().equals(companyId))
+                .sorted(Comparator.comparingInt(Clause::getSortOrder).thenComparing(Clause::getTitle))
+                .toList();
     }
 
     public Clause findClause(Long id) {

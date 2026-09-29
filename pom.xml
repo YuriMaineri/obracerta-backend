@@ -20,6 +20,7 @@
   <properties>
     <java.version>21</java.version>
     <spring-modulith.version>2.1.1</spring-modulith.version>
+    <openhtmltopdf.version>1.1.37</openhtmltopdf.version>
   </properties>
 
   <dependencyManagement>
@@ -57,6 +58,17 @@
          ele exige a tabela event_publication e o esquema e validado contra o Flyway.
          Quando o primeiro evento entre modulos aparecer, adicionar o starter
          junto com uma migracao que crie a tabela. -->
+
+    <!-- Proposta em PDF: template HTML (Thymeleaf) convertido por OpenHTMLtoPDF (PDFBox 3). -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-thymeleaf</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.github.openhtmltopdf</groupId>
+      <artifactId>openhtmltopdf-pdfbox</artifactId>
+      <version>${openhtmltopdf.version}</version>
+    </dependency>
 
     <!-- No Boot 4 a autoconfiguracao do Flyway saiu do nucleo: sem este starter
          o flyway-core fica no classpath mas as migracoes nunca rodam. -->
