@@ -89,6 +89,23 @@ class ProposalIntegrationTest {
     }
 
     @Test
+    void alternativesAreListedButStayOutOfTheTotal() throws IOException {
+        EstimateDetails fernando = estimates.create(new EstimateRequest(cartorio.customer().id(), null,
+                LocalDate.of(2026, 8, 20), null, null, null, MaterialSupply.CUSTOMER_SUPPLIED, null, null, null, null,
+                List.of(new EstimateRequest.ServiceLine("Pintura completa do apartamento", null)),
+                List.of(),
+                List.of(new EstimateRequest.PriceLine("Valor da mão de obra", new BigDecimal("33500.00")),
+                        new EstimateRequest.PriceLine("Sem a pintura das grades", new BigDecimal("31000.00"), true)),
+                List.of(), List.of()));
+
+        String text = extractText(proposals.generate(fernando.id()).content());
+
+        assertThat(text).contains("R$ 33.500,00").contains("Sem a pintura das grades").contains("R$ 31.000,00")
+                .doesNotContain("R$ 64.500,00");
+        assertThat(text.replaceAll("\\s", "")).contains("ALTERNATIVAS(NÃOSOMADASAOTOTAL)");
+    }
+
+    @Test
     void leadTimeAndMoneyFormatting() {
         assertThat(ProposalService.leadTime(4, 5)).isEqualTo("4 a 5 dias úteis");
         assertThat(ProposalService.leadTime(null, 1)).isEqualTo("1 dia útil");

@@ -20,6 +20,7 @@ record ProposalView(
         String materialTotal,
         String materialNote,
         List<Item> priceItems,
+        List<Item> alternativeItems,
         String grandTotal,
         String leadTime,
         List<String> payment,

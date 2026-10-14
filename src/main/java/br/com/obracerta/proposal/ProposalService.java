@@ -79,10 +79,9 @@ public class ProposalService {
                 .map(m -> new ProposalView.Item(m.description(), m.totalPrice() == null ? null : money(m.totalPrice())))
                 .toList();
         BigDecimal materialSum = sum(e.materials().stream().map(EstimateDetails.Material::totalPrice));
-        List<ProposalView.Item> priceItems = e.priceLines().stream()
-                .map(p -> new ProposalView.Item(p.description(), p.amount() == null ? null : money(p.amount())))
-                .toList();
-        BigDecimal total = sum(e.priceLines().stream().map(EstimateDetails.Price::amount))
+        List<ProposalView.Item> priceItems = priceItems(e, false);
+        List<ProposalView.Item> alternativeItems = priceItems(e, true);
+        BigDecimal total = sum(e.priceLines().stream().filter(p -> !p.alternative()).map(EstimateDetails.Price::amount))
                 .add(e.materialSupply() == MaterialSupply.ITEMIZED ? materialSum : BigDecimal.ZERO);
 
         List<String> payment = new ArrayList<>();
@@ -115,6 +114,7 @@ public class ProposalService {
                 materialSum.signum() > 0 ? money(materialSum) : null,
                 materialNote(e),
                 priceItems,
+                alternativeItems,
                 total.signum() > 0 ? money(total) : null,
                 leadTime(e.minLeadDays(), e.maxLeadDays()),
                 payment,
@@ -123,6 +123,13 @@ public class ProposalService {
                 contents(clauses, ClauseType.REGULATORY),
                 (c.getCity() == null ? "" : c.getCity() + ", ") + e.issueDate().format(DATE) + ".",
                 c.getSignatoryName() != null ? c.getSignatoryName() : c.getLegalName());
+    }
+
+    private static List<ProposalView.Item> priceItems(EstimateDetails e, boolean alternative) {
+        return e.priceLines().stream()
+                .filter(p -> p.alternative() == alternative)
+                .map(p -> new ProposalView.Item(p.description(), p.amount() == null ? null : money(p.amount())))
+                .toList();
     }
 
     private static String materialNote(EstimateDetails e) {

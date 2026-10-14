@@ -41,6 +41,6 @@ public record EstimateDetails(
     public record Material(String description, BigDecimal quantity, BigDecimal totalPrice) {
     }
 
-    public record Price(String description, BigDecimal amount) {
+    public record Price(String description, BigDecimal amount, boolean alternative) {
     }
 }

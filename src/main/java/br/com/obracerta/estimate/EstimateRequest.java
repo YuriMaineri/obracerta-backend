@@ -67,6 +67,11 @@ public record EstimateRequest(
             @NotBlank(message = "Descricao do valor e obrigatoria")
             @Size(max = 250, message = "Descricao do valor com no maximo 250 caracteres") String description,
             @NotNull(message = "Valor e obrigatorio")
-            @PositiveOrZero(message = "Valor nao pode ser negativo") BigDecimal amount) {
+            @PositiveOrZero(message = "Valor nao pode ser negativo") BigDecimal amount,
+            boolean alternative) {
+
+        public PriceLine(String description, BigDecimal amount) {
+            this(description, amount, false);
+        }
     }
 }

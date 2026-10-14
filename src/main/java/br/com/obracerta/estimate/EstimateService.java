@@ -89,7 +89,7 @@ public class EstimateService {
                 d.bankAccountId(), d.clauseIds(),
                 d.services().stream().map(s -> new EstimateRequest.ServiceLine(s.description(), s.internalNote())).toList(),
                 d.materials().stream().map(m -> new EstimateRequest.MaterialLine(m.description(), m.quantity(), m.totalPrice())).toList(),
-                d.priceLines().stream().map(p -> new EstimateRequest.PriceLine(p.description(), p.amount())).toList(),
+                d.priceLines().stream().map(p -> new EstimateRequest.PriceLine(p.description(), p.amount(), p.alternative())).toList(),
                 d.exclusions(), d.internalNotes());
         Set<Long> activeClauses = company.listClauses().stream().map(Clause::getId).collect(Collectors.toSet());
         Set<Long> clauseIds = copy.clauseIds().stream().filter(activeClauses::contains).collect(Collectors.toSet());
@@ -174,7 +174,7 @@ public class EstimateService {
                 e.getEstimatedMaterialCost(), e.getPaymentTerms(), e.getBankAccountId(), Set.copyOf(e.getClauseIds()),
                 e.services().stream().map(s -> new EstimateDetails.Service(s.getDescription(), s.getInternalNote())).toList(),
                 e.getMaterials().stream().map(m -> new EstimateDetails.Material(m.getDescription(), m.getQuantity(), m.getTotalPrice())).toList(),
-                e.getPriceLines().stream().map(p -> new EstimateDetails.Price(p.getDescription(), p.getAmount())).toList(),
+                e.getPriceLines().stream().map(p -> new EstimateDetails.Price(p.getDescription(), p.getAmount(), p.isAlternative())).toList(),
                 e.getExclusions().stream().map(Exclusion::getContent).toList(),
                 e.getInternalNotes().stream().map(InternalNote::getContent).toList(),
                 e.getUpdatedAt());
@@ -184,7 +184,10 @@ public class EstimateService {
         var prices = e.getPriceLines();
         return new EstimateSummary(e.getId(), e.getNumber(), e.getStatus(), e.getCustomerId(),
                 customer == null ? null : customer.getName(), e.getTitle(), e.getIssueDate(),
-                prices.isEmpty() ? null : prices.getFirst().getAmount(), prices.size(),
+                prices.stream().filter(p -> !p.isAlternative()).findFirst()
+                        .or(() -> prices.stream().findFirst())
+                        .map(EstimatePriceLine::getAmount).orElse(null),
+                prices.size(),
                 e.getMinLeadDays(), e.getMaxLeadDays(), e.getUpdatedAt());
     }
 

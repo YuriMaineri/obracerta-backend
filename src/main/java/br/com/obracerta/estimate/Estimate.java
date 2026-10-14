@@ -131,7 +131,7 @@ public class Estimate {
         priceLines.clear();
         for (int i = 0; i < lines.size(); i++) {
             var line = lines.get(i);
-            priceLines.add(new EstimatePriceLine(this, line.description().trim(), line.amount(), i));
+            priceLines.add(new EstimatePriceLine(this, line.description().trim(), line.amount(), line.alternative(), i));
         }
     }
 

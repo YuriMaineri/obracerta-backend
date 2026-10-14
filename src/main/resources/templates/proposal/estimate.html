@@ -72,6 +72,9 @@
     .total .t-label { font-size: 8.5pt; letter-spacing: 1.2pt; text-transform: uppercase; font-weight: 500; }
     .total .t-value { text-align: right; font-size: 17pt; line-height: 20pt; font-weight: 500; white-space: nowrap; }
 
+    .alternatives { margin-top: 12pt; }
+    .alternatives .items td { color: #3b4652; }
+
     .lead { font-size: 12pt; font-weight: 500; }
 
     /* Assinatura */
@@ -179,9 +182,9 @@
   <p class="note" th:if="${p.materialNote}" th:text="${p.materialNote}"></p>
 </div>
 
-<div class="section" th:if="${!p.priceItems.isEmpty()}">
+<div class="section" th:if="${!p.priceItems.isEmpty() or !p.alternativeItems.isEmpty()}">
   <h2><span class="n">03</span>Valor da mão de obra e material</h2>
-  <table class="items">
+  <table class="items" th:if="${!p.priceItems.isEmpty()}">
     <tr th:each="v : ${p.priceItems}">
       <td th:text="${v.description}">Mão de obra</td>
       <td class="amount" th:text="${v.amount}">R$ 857,00</td>
@@ -194,6 +197,15 @@
       <td class="t-value" th:text="${p.grandTotal}">R$ 1.202,00</td>
     </tr>
   </table>
+  <div class="alternatives" th:if="${!p.alternativeItems.isEmpty()}">
+    <div class="label">Alternativas (não somadas ao total)</div>
+    <table class="items">
+      <tr th:each="v : ${p.alternativeItems}">
+        <td th:text="${v.description}">Sem a pintura das grades</td>
+        <td class="amount" th:text="${v.amount}">R$ 950,00</td>
+      </tr>
+    </table>
+  </div>
 </div>
 
 <div class="section" th:if="${p.leadTime}">
