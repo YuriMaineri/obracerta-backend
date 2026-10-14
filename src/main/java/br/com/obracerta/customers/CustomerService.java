@@ -13,9 +13,7 @@ import java.util.NoSuchElementException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/**
- * API do modulo de clientes. E por aqui que os demais modulos conversam com este.
- */
+/** API do módulo de clientes. */
 @Service
 @Transactional(readOnly = true)
 public class CustomerService {
@@ -71,11 +69,7 @@ public class CustomerService {
                 blankToNull(request.city()), BrazilianDocuments.normalizePostalCode(request.postalCode()));
     }
 
-    /**
-     * Guarda so os digitos do CPF/CNPJ e confere tamanho e digitos verificadores
-     * conforme o tipo de pessoa. Documento e opcional: alguns orcamentos reais para
-     * pessoa fisica nao trazem CPF. A mensagem fica em portugues porque e exibida ao usuario.
-     */
+    /** Documento é opcional; quando informado, guarda só os dígitos e confere os verificadores. */
     static String normalizeTaxId(Customer.PersonType type, String taxId) {
         String digits = BrazilianDocuments.digitsOnly(taxId);
         if (digits.isEmpty()) {

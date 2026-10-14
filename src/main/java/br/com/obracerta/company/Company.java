@@ -39,7 +39,6 @@ public class Company {
     @Column(length = 10)
     private String postalCode;
 
-    /** Nome que assina a proposta ("Carlos Maineri"). */
     @Column(length = 150)
     private String signatoryName;
 

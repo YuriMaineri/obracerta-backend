@@ -1,12 +1,4 @@
-/**
- * Geracao dos documentos do orcamento.
- *
- * <p>Dois documentos, uma unica fonte de dados: a memoria de calculo interna, com
- * custo e margem, e a proposta comercial do cliente, agrupada e sem custo exposto.
- *
- * <p>Este modulo le o orcamento e os dados da empresa, e nunca e chamado por eles.
- * Manter essa direcao evita ciclo entre orcamento e proposta.
- */
+/** Geração da proposta em PDF; lê orçamento e empresa e nunca é chamado por eles. */
 @org.springframework.modulith.ApplicationModule(
         displayName = "Proposal",
         allowedDependencies = {"shared", "estimate", "company"})

@@ -1,8 +1,6 @@
 package br.com.obracerta.shared;
 
-/**
- * Regras de documentos brasileiros (CPF e CNPJ).
-*/
+/** Validação, normalização e formatação de CPF, CNPJ, telefone e CEP. */
 public final class BrazilianDocuments {
 
     private BrazilianDocuments() {
@@ -12,7 +10,6 @@ public final class BrazilianDocuments {
         return value == null ? "" : value.replaceAll("\\D", "");
     }
 
-    /** CPF valido pelos dois digitos verificadores (modulo 11). */
     public static boolean isValidCpf(String value) {
         String d = digitsOnly(value);
         if (d.length() != 11 || d.chars().distinct().count() == 1) {
@@ -22,7 +19,6 @@ public final class BrazilianDocuments {
                 && cpfCheckDigit(d, 10) == d.charAt(10) - '0';
     }
 
-    /** CNPJ valido pelos dois digitos verificadores (modulo 11 com pesos de 2 a 9). */
     public static boolean isValidCnpj(String value) {
         String d = digitsOnly(value);
         if (d.length() != 14 || d.chars().distinct().count() == 1) {
@@ -32,7 +28,6 @@ public final class BrazilianDocuments {
                 && cnpjCheckDigit(d, 13) == d.charAt(13) - '0';
     }
 
-    /** Telefone com DDD (10 ou 11 digitos), guardado so com digitos. Vazio vira null. */
     public static String normalizePhone(String phone) {
         String digits = digitsOnly(phone);
         if (digits.isEmpty()) {
@@ -44,7 +39,6 @@ public final class BrazilianDocuments {
         return digits;
     }
 
-    /** CEP com 8 digitos, guardado so com digitos. Vazio vira null. */
     public static String normalizePostalCode(String postalCode) {
         String digits = digitsOnly(postalCode);
         if (digits.isEmpty()) {
@@ -56,7 +50,6 @@ public final class BrazilianDocuments {
         return digits;
     }
 
-    /** CNPJ obrigatoriamente valido, guardado so com digitos. Vazio vira null. */
     public static String normalizeCnpj(String cnpj) {
         String digits = digitsOnly(cnpj);
         if (digits.isEmpty()) {

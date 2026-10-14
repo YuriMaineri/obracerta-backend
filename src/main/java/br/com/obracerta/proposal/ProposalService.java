@@ -27,7 +27,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Stream;
 
-/** Gera a proposta comercial do cliente, no formato dos orçamentos atuais. Notas internas nunca entram. */
+/** Gera a proposta do cliente; notas internas nunca entram. */
 @Service
 @Transactional(readOnly = true)
 public class ProposalService {
@@ -229,7 +229,6 @@ public class ProposalService {
         return ProposalService.class.getResourceAsStream("/fonts/" + file);
     }
 
-    /** Nome de arquivo sem acentos nem espaços. */
     static String slug(String text) {
         String ascii = Normalizer.normalize(text == null ? "" : text, Normalizer.Form.NFKD).replaceAll("\\p{M}", "");
         return ascii.replaceAll("[^A-Za-z0-9]+", "-").replaceAll("(^-|-$)", "");

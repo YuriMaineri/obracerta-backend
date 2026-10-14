@@ -4,10 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.modulith.Modulithic;
 
-/**
- * Monolito modular. Cada subpacote direto deste pacote e um modulo de aplicacao
- * na visao do Spring Modulith. Nao crie classes soltas aqui.
- */
+/** Monólito modular: cada subpacote direto é um módulo do Spring Modulith. */
 @Modulithic(systemName = "ObraCerta")
 @SpringBootApplication
 public class ObraCertaApplication {

@@ -14,13 +14,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
-/**
- * Traduz excecoes de dominio em respostas HTTP no formato ProblemDetail (RFC 9457).
- *
- * <p>Herdar de ResponseEntityExceptionHandler faz os erros de validacao (@Valid)
- * sairem no mesmo formato, com status 400. O front-end le sempre o campo "detail",
- * que continua em portugues porque e exibido ao usuario.
- */
+/** Converte exceções em ProblemDetail; o front-end sempre lê o campo "detail". */
 @RestControllerAdvice
 class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
@@ -34,10 +28,7 @@ class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
-    /**
-     * Erros de @Valid: junta as mensagens dos campos no "detail", para a tela mostrar
-     * "E-mail invalido" em vez do generico "Invalid request content".
-     */
+    /** Junta as mensagens de @Valid no "detail". */
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
             HttpHeaders headers, HttpStatusCode status, WebRequest request) {

@@ -10,7 +10,7 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      # O esquema e controlado pelo Flyway. Nunca use update aqui.
+      # O esquema é do Flyway; nunca use update.
       ddl-auto: validate
     properties:
       hibernate:
@@ -23,14 +23,11 @@ spring:
   data:
     web:
       pageable:
-        # Serializa Page como {content, page:{size, number, totalElements, totalPages}}.
-        # O modo padrao (DIRECT) expoe a estrutura interna do PageImpl e muda entre versoes.
+        # Page como {content, page:{...}}, estável entre versões.
         serialization-mode: via-dto
         max-page-size: 100
 
   modulith:
-    # So e modulo o pacote que tiver @ApplicationModule no package-info.
-    # A verificacao das dependencias entre modulos roda no ModularityTest.
     detection-strategy: explicitly-annotated
 
 logging:

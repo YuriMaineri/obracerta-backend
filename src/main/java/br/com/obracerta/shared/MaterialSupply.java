@@ -1,9 +1,6 @@
 package br.com.obracerta.shared;
 
-/**
- * Regime de material: quem fornece o material e como ele entra no orcamento.
- * As quatro formas foram observadas nos orcamentos reais da empresa.
- */
+/** Quem fornece o material e como ele entra no orçamento. */
 public enum MaterialSupply {
 
     /** Material por conta do cliente; nao entra no valor. */

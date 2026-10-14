@@ -30,7 +30,6 @@ record ProposalView(
         String placeAndDate,
         String signatory) {
 
-    /** Linha com descrição e valor já formatado (o valor pode faltar). */
     record Item(String description, String amount) {
     }
 }

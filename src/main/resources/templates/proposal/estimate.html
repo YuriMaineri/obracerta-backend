@@ -27,7 +27,6 @@
 
     .footer { position: running(footer); font-size: 8pt; line-height: 11pt; color: #7a8591; padding-top: 14pt; border-top: 0.75pt solid #d5dbe2; }
 
-    /* Cabeçalho */
     .head td { vertical-align: middle; }
     .logo { width: 150pt; height: 71pt; }
     .company-name { font-size: 17pt; line-height: 20pt; font-weight: 500; }
@@ -35,7 +34,6 @@
     .company strong { display: block; font-weight: 500; font-size: 10pt; color: #1d2733; }
     .rule { height: 3pt; background: #1f5f99; margin: 14pt 0 0 0; }
 
-    /* Título */
     .title { margin-top: 22pt; }
     .title td { vertical-align: bottom; }
     .kicker { font-size: 8pt; line-height: 10pt; letter-spacing: 1.2pt; text-transform: uppercase; color: #1f5f99; font-weight: 500; }
@@ -43,7 +41,6 @@
     .meta { text-align: right; font-size: 9pt; line-height: 13pt; color: #4b5663; }
     .meta strong { font-weight: 500; color: #1d2733; }
 
-    /* Cliente */
     .client { margin-top: 16pt; background: #f2f5f8; }
     .client td { padding: 12pt 14pt; width: 50%; }
     .client td + td { border-left: 0.75pt solid #d5dbe2; }
@@ -53,7 +50,6 @@
     .object { margin-top: 8pt; }
     .object .value { font-size: 11pt; font-weight: 500; }
 
-    /* Seções */
     .section { margin-top: 20pt; page-break-inside: avoid; }
     h2 { margin: 0 0 8pt 0; padding-bottom: 5pt; border-bottom: 0.75pt solid #d5dbe2; font-size: 9pt; line-height: 12pt; letter-spacing: 1.2pt; text-transform: uppercase; font-weight: 500; color: #1d2733; page-break-after: avoid; }
     h2 .n { color: #1f5f99; margin-right: 6pt; }
@@ -61,7 +57,6 @@
     li { margin: 0 0 3pt 0; }
     .soft li { color: #3b4652; }
 
-    /* Tabelas de valores */
     .items td { padding: 5pt 0; border-bottom: 0.5pt solid #e6eaef; }
     .items td.amount { text-align: right; white-space: nowrap; width: 110pt; }
     .items tr.subtotal td { border-bottom: none; padding-top: 7pt; font-weight: 500; }
@@ -77,7 +72,6 @@
 
     .lead { font-size: 12pt; font-weight: 500; }
 
-    /* Assinatura */
     .sign { margin-top: 34pt; page-break-inside: avoid; }
     .sign td { vertical-align: bottom; }
     .sign .place { color: #3b4652; }
@@ -86,7 +80,6 @@
     .sign .who { font-weight: 500; }
     .sign .ids { font-size: 9pt; line-height: 13pt; color: #4b5663; }
 
-    /* Normas */
     .norms { margin-top: 26pt; padding: 12pt 14pt; border: 0.75pt solid #d5dbe2; page-break-inside: avoid; }
     .norms p { font-size: 8.5pt; line-height: 12pt; color: #3b4652; margin-top: 4pt; }
     .norms p strong { font-weight: 500; color: #1d2733; }
@@ -101,7 +94,7 @@
 </head>
 <body>
 
-<!-- Rodapé repetido em todas as páginas (running element — precisa vir antes do conteúdo) -->
+<!-- Rodapé de todas as páginas: precisa vir antes do conteúdo -->
 <div class="footer">
   <span th:text="${p.companyName}">Maineri Elétrica, Construções e Reformas</span>
   <span th:if="${p.companyTaxId}" th:text="' · CNPJ ' + ${p.companyTaxId}"> · CNPJ 24.839.705/0001-65</span>

@@ -1,10 +1,4 @@
-/**
- * Tipos compartilhados por todos os modulos: enums e objetos de valor do dominio.
- *
- * <p>E um modulo aberto: seus subpacotes podem ser acessados livremente. Por isso,
- * so entra aqui o que for realmente transversal e estavel. Regra pratica: se o tipo
- * pertence a um unico modulo, ele nao mora aqui.
- */
+/** Tipos transversais, abertos a todos os módulos. Só entra aqui o que é de fato compartilhado. */
 @org.springframework.modulith.ApplicationModule(
         type = org.springframework.modulith.ApplicationModule.Type.OPEN,
         displayName = "Shared")

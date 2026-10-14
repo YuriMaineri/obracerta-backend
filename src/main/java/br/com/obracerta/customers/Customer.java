@@ -4,17 +4,11 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import java.time.Instant;
 
-/**
- * Cliente da empresa. Pode ser pessoa fisica ou juridica.
- *
- * <p>Tipo publico do modulo: outros modulos podem referenciar Customer, mas nao
- * enxergam o repositorio nem nada dentro de customers.internal.
- */
+/** Cliente da empresa, pessoa física ou jurídica. */
 @Entity
 @Table(name = "customer")
 public class Customer {
 
-    /** INDIVIDUAL = pessoa fisica (CPF); COMPANY = pessoa juridica (CNPJ). */
     public enum PersonType { INDIVIDUAL, COMPANY }
 
     @Id
@@ -25,16 +19,13 @@ public class Customer {
     @Column(nullable = false, length = 20)
     private PersonType personType = PersonType.COMPANY;
 
-    /** Nome ou razao social. */
     @NotBlank
     @Column(nullable = false, length = 200)
     private String name;
 
-    /** CPF ou CNPJ, apenas digitos. */
     @Column(length = 20)
     private String taxId;
 
-    /** Pessoa de contato. Nos orcamentos aparece como "A/C Sra. Maris Gundlach". */
     @Column(length = 150)
     private String contactPerson;
 
@@ -47,14 +38,12 @@ public class Customer {
     @Column(length = 250)
     private String address;
 
-    /** Bairro. */
     @Column(length = 100)
     private String district;
 
     @Column(length = 100)
     private String city;
 
-    /** CEP. */
     @Column(length = 10)
     private String postalCode;
 
@@ -65,7 +54,6 @@ public class Customer {
     private Instant createdAt = Instant.now();
 
     protected Customer() {
-        // exigido pelo JPA
     }
 
     public Customer(PersonType personType, String name, String taxId) {

@@ -1,20 +1,25 @@
 package br.com.obracerta.shared;
 
-/**
- * Unidades observadas nos orcamentos reais da empresa.
- * LUMP_SUM (verba) representa servico cobrado por valor fechado, sem quantidade.
- */
+/** Unidades de cobrança dos serviços e de compra dos insumos. */
 public enum Unit {
 
-    SQUARE_METER("m2"),
+    SQUARE_METER("m²"),
     METER("m"),
+    CUBIC_METER("m³"),
     PIECE("un"),
     POINT("ponto"),
     HOUR("h"),
-    DAY("diaria"),
-    LUMP_SUM("verba");
+    DAY("diária"),
+    LUMP_SUM("verba"),
+    KILOGRAM("kg"),
+    LITER("L"),
+    BAG("saco"),
+    CAN("lata"),
+    ROLL("rolo"),
+    BAR("barra"),
+    BOX("caixa"),
+    PACKAGE("pacote");
 
-    /** Sigla exibida na proposta, em portugues. */
     private final String symbol;
 
     Unit(String symbol) {
