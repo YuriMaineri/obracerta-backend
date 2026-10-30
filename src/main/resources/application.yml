@@ -36,3 +36,16 @@ logging:
 
 server:
   port: 8080
+  servlet:
+    session:
+      timeout: 8h
+      cookie:
+        http-only: true
+        same-site: lax
+
+# Primeiro usuário, criado na subida só se não existir nenhum. A senha vem de variável de ambiente, nunca do Git.
+obracerta:
+  admin:
+    name: ${OBRACERTA_ADMIN_NAME:Administrador}
+    email: ${OBRACERTA_ADMIN_EMAIL:}
+    password: ${OBRACERTA_ADMIN_PASSWORD:}
