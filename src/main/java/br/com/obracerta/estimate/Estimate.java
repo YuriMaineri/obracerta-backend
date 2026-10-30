@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/** Orçamento. Na Fatia 1 guarda exatamente o que hoje vai no documento, em texto livre e sem cálculo. */
+/** Orçamento: o que vai no documento e, para os serviços ligados ao catálogo, o preço sugerido. */
 @Entity
 @Table(name = "estimate")
 public class Estimate {
@@ -59,6 +59,12 @@ public class Estimate {
 
     @Column(nullable = false)
     private Instant updatedAt = Instant.now();
+
+    @Column(precision = 12, scale = 2)
+    private BigDecimal suggestedTotal;
+
+    @Column(precision = 10, scale = 3)
+    private BigDecimal suggestedDays;
 
     @OneToMany(mappedBy = "estimate", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sortOrder")
@@ -110,13 +116,17 @@ public class Estimate {
         this.updatedAt = Instant.now();
     }
 
-    void replaceServices(List<EstimateRequest.ServiceLine> lines) {
+    void replaceServices(List<ServiceEntry> entries) {
         EstimateArea area = defaultArea();
         area.getItems().clear();
-        for (int i = 0; i < lines.size(); i++) {
-            var line = lines.get(i);
-            area.getItems().add(new EstimateItem(area, line.description().trim(), blankToNull(line.internalNote()), i));
+        for (int i = 0; i < entries.size(); i++) {
+            area.getItems().add(new EstimateItem(area, entries.get(i), i));
         }
+    }
+
+    void updateSuggestion(BigDecimal total, BigDecimal days) {
+        this.suggestedTotal = total;
+        this.suggestedDays = days;
     }
 
     void replaceMaterials(List<EstimateRequest.MaterialLine> lines) {
@@ -165,7 +175,7 @@ public class Estimate {
         return sections.getFirst().getAreas().getFirst();
     }
 
-    private static String blankToNull(String value) {
+    static String blankToNull(String value) {
         return value == null || value.isBlank() ? null : value.trim();
     }
 
@@ -183,6 +193,8 @@ public class Estimate {
     public String getPaymentTerms() { return paymentTerms; }
     public EstimateStatus getStatus() { return status; }
     public Instant getUpdatedAt() { return updatedAt; }
+    public BigDecimal getSuggestedTotal() { return suggestedTotal; }
+    public BigDecimal getSuggestedDays() { return suggestedDays; }
     List<EstimateMaterial> getMaterials() { return materials; }
     List<EstimatePriceLine> getPriceLines() { return priceLines; }
     List<Exclusion> getExclusions() { return exclusions; }

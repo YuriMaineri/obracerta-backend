@@ -1,5 +1,6 @@
 package br.com.obracerta.estimate;
 
+import br.com.obracerta.shared.Difficulty;
 import br.com.obracerta.shared.MaterialSupply;
 
 import java.math.BigDecimal;
@@ -8,7 +9,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
-/** Orçamento completo, na visão interna (inclui as notas internas). Base da tela e, na Semana 4, do PDF. */
+/** Orçamento completo, na visão interna (notas internas e preço sugerido). Base da tela e do PDF. */
 public record EstimateDetails(
         Long id,
         String number,
@@ -29,13 +30,17 @@ public record EstimateDetails(
         List<Price> priceLines,
         List<String> exclusions,
         List<String> internalNotes,
+        BigDecimal suggestedTotal,
+        BigDecimal suggestedDays,
         Instant updatedAt) {
 
     public record CustomerSummary(Long id, String name, String personType, String taxId, String contactPerson,
                                   String address, String district, String city, String postalCode) {
     }
 
-    public record Service(String description, String internalNote) {
+    /** serviceId nulo = texto livre, sem cálculo. suggestedPrice já inclui custo indireto e margem. */
+    public record Service(String description, String internalNote, Long serviceId, BigDecimal quantity,
+                          Difficulty difficulty, BigDecimal suggestedPrice) {
     }
 
     public record Material(String description, BigDecimal quantity, BigDecimal totalPrice) {

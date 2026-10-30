@@ -1,5 +1,6 @@
 package br.com.obracerta.estimate;
 
+import br.com.obracerta.shared.Difficulty;
 import br.com.obracerta.shared.MaterialSupply;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
@@ -53,7 +54,14 @@ public record EstimateRequest(
 
     public record ServiceLine(
             @NotBlank(message = "Descricao do servico e obrigatoria") String description,
-            String internalNote) {
+            String internalNote,
+            Long serviceId,
+            @PositiveOrZero(message = "Quantidade nao pode ser negativa") BigDecimal quantity,
+            Difficulty difficulty) {
+
+        public ServiceLine(String description, String internalNote) {
+            this(description, internalNote, null, null, null);
+        }
     }
 
     public record MaterialLine(

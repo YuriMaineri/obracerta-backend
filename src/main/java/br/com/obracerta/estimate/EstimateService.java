@@ -1,11 +1,19 @@
 package br.com.obracerta.estimate;
 
+import br.com.obracerta.catalog.CatalogService;
+import br.com.obracerta.catalog.ServiceDetails;
 import br.com.obracerta.company.BankAccount;
 import br.com.obracerta.company.Clause;
 import br.com.obracerta.company.CompanyService;
 import br.com.obracerta.customers.Customer;
 import br.com.obracerta.customers.CustomerService;
 import br.com.obracerta.estimate.internal.EstimateRepository;
+import br.com.obracerta.pricing.PriceCalculator;
+import br.com.obracerta.pricing.PricingService;
+import br.com.obracerta.pricing.Rates;
+import br.com.obracerta.shared.Difficulty;
+import br.com.obracerta.shared.MaterialSupply;
+import br.com.obracerta.shared.PricingMode;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +21,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,11 +34,16 @@ public class EstimateService {
     private final EstimateRepository repository;
     private final CustomerService customers;
     private final CompanyService company;
+    private final CatalogService catalog;
+    private final PricingService pricing;
 
-    EstimateService(EstimateRepository repository, CustomerService customers, CompanyService company) {
+    EstimateService(EstimateRepository repository, CustomerService customers, CompanyService company,
+                    CatalogService catalog, PricingService pricing) {
         this.repository = repository;
         this.customers = customers;
         this.company = company;
+        this.catalog = catalog;
+        this.pricing = pricing;
     }
 
     public Page<EstimateSummary> search(String query, EstimateStatus status, Long customerId, Pageable pageable) {
@@ -87,7 +101,8 @@ public class EstimateService {
         EstimateRequest copy = new EstimateRequest(d.customer().id(), d.title(), LocalDate.now(), d.validityDays(),
                 d.minLeadDays(), d.maxLeadDays(), d.materialSupply(), d.estimatedMaterialCost(), d.paymentTerms(),
                 d.bankAccountId(), d.clauseIds(),
-                d.services().stream().map(s -> new EstimateRequest.ServiceLine(s.description(), s.internalNote())).toList(),
+                d.services().stream().map(s -> new EstimateRequest.ServiceLine(s.description(), s.internalNote(),
+                        s.serviceId(), s.quantity(), s.difficulty())).toList(),
                 d.materials().stream().map(m -> new EstimateRequest.MaterialLine(m.description(), m.quantity(), m.totalPrice())).toList(),
                 d.priceLines().stream().map(p -> new EstimateRequest.PriceLine(p.description(), p.amount(), p.alternative())).toList(),
                 d.exclusions(), d.internalNotes());
@@ -128,12 +143,46 @@ public class EstimateService {
             throw new IllegalArgumentException("Prazo minimo maior que o prazo maximo");
         }
         estimate.updateHeader(request, bankAccountId);
-        estimate.replaceServices(orEmpty(request.services()));
+        priceServices(estimate, orEmpty(request.services()), request.materialSupply());
         estimate.replaceMaterials(orEmpty(request.materials()));
         estimate.replacePriceLines(orEmpty(request.priceLines()));
         estimate.replaceExclusions(orEmpty(request.exclusions()));
         estimate.replaceInternalNotes(orEmpty(request.internalNotes()));
         estimate.replaceClauses(clauseIds);
+    }
+
+    private void priceServices(Estimate estimate, List<EstimateRequest.ServiceLine> lines,
+                               MaterialSupply supply) {
+        Rates rates = pricing.rates();
+        boolean chargeMaterial = PriceCalculator.chargesMaterial(supply);
+        List<ServiceEntry> entries = new ArrayList<>();
+        List<PriceCalculator.ItemQuote> quotes = new ArrayList<>();
+        for (EstimateRequest.ServiceLine line : lines) {
+            String description = line.description().trim();
+            String note = Estimate.blankToNull(line.internalNote());
+            if (line.serviceId() == null) {
+                entries.add(ServiceEntry.text(description, note));
+                continue;
+            }
+            ServiceDetails service = catalog.findService(line.serviceId());
+            BigDecimal quantity = service.pricingMode() == PricingMode.LUMP_SUM ? BigDecimal.ONE : line.quantity();
+            if (quantity == null || quantity.signum() == 0) {
+                throw new IllegalArgumentException("Informe a quantidade de \"%s\" (em %s)."
+                        .formatted(service.name(), service.unit().getSymbol()));
+            }
+            Difficulty difficulty = line.difficulty() == null ? Difficulty.NORMAL : line.difficulty();
+            var quote = PriceCalculator.item(rates, quantity, service.daysPerUnit(), service.materialCostPerUnit(),
+                    difficulty, chargeMaterial);
+            quotes.add(quote);
+            entries.add(new ServiceEntry(description, note, service.id(), service.pricingMode(), quantity, difficulty, quote));
+        }
+        estimate.replaceServices(entries);
+        if (quotes.isEmpty()) {
+            estimate.updateSuggestion(null, null);
+        } else {
+            var total = PriceCalculator.total(rates, quotes, chargeMaterial);
+            estimate.updateSuggestion(total.total(), total.laborDays());
+        }
     }
 
     private void validateClauses(Set<Long> clauseIds) {
@@ -172,11 +221,13 @@ public class EstimateService {
         return new EstimateDetails(e.getId(), e.getNumber(), e.getStatus(), customer, e.getTitle(), e.getIssueDate(),
                 e.getValidityDays(), e.getMinLeadDays(), e.getMaxLeadDays(), e.getMaterialSupply(),
                 e.getEstimatedMaterialCost(), e.getPaymentTerms(), e.getBankAccountId(), Set.copyOf(e.getClauseIds()),
-                e.services().stream().map(s -> new EstimateDetails.Service(s.getDescription(), s.getInternalNote())).toList(),
+                e.services().stream().map(s -> new EstimateDetails.Service(s.getDescription(), s.getInternalNote(),
+                        s.getServiceId(), s.getQuantity(), s.getDifficulty(), s.getSuggestedPrice())).toList(),
                 e.getMaterials().stream().map(m -> new EstimateDetails.Material(m.getDescription(), m.getQuantity(), m.getTotalPrice())).toList(),
                 e.getPriceLines().stream().map(p -> new EstimateDetails.Price(p.getDescription(), p.getAmount(), p.isAlternative())).toList(),
                 e.getExclusions().stream().map(Exclusion::getContent).toList(),
                 e.getInternalNotes().stream().map(InternalNote::getContent).toList(),
+                e.getSuggestedTotal(), e.getSuggestedDays(),
                 e.getUpdatedAt());
     }
 
