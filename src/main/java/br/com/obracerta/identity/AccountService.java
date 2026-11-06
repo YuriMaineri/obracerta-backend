@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
 import java.util.NoSuchElementException;
 
 /** Usuários do sistema. O login usa o e-mail; a senha só existe como hash. */
@@ -17,6 +18,8 @@ import java.util.NoSuchElementException;
 public class AccountService implements UserDetailsService {
 
     static final int MIN_PASSWORD_LENGTH = 8;
+    /** Limite do bcrypt: o que passar de 72 bytes seria ignorado. */
+    static final int MAX_PASSWORD_BYTES = 72;
 
     private final AppUserRepository users;
     private final PasswordEncoder passwordEncoder;
@@ -74,6 +77,9 @@ public class AccountService implements UserDetailsService {
     private static void checkStrength(String password) {
         if (password == null || password.length() < MIN_PASSWORD_LENGTH) {
             throw new IllegalArgumentException("A senha precisa ter pelo menos " + MIN_PASSWORD_LENGTH + " caracteres.");
+        }
+        if (password.getBytes(StandardCharsets.UTF_8).length > MAX_PASSWORD_BYTES) {
+            throw new IllegalArgumentException("A senha pode ter no máximo 72 caracteres (menos, se tiver acentos).");
         }
     }
 }

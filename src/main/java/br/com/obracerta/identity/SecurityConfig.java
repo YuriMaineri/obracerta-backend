@@ -34,6 +34,8 @@ class SecurityConfig {
                     csrf.ignoringRequestMatchers("/api/auth/login");
                 })
                 .securityContext(context -> context.securityContextRepository(contexts))
+                // API sem tela de login no servidor: não guarda a requisição negada, e por isso não abre sessão anônima.
+                .requestCache(cache -> cache.disable())
                 .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .logout(logout -> logout
                         .logoutUrl("/api/auth/logout")

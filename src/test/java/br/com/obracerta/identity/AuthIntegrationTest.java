@@ -77,6 +77,35 @@ class AuthIntegrationTest {
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
+    @Test
+    void blocksTheEmailAfterFiveWrongPasswords() {
+        accounts.createUser("Bloqueio", "bloqueio@maineri.com.br", "senha-forte-123");
+        for (int i = 0; i < LoginThrottle.MAX_FAILURES; i++) {
+            assertThat(login("bloqueio@maineri.com.br", "senha-errada")).hasStatus(401);
+        }
+
+        MvcTestResult blocked = login("Bloqueio@maineri.com.br", "senha-forte-123");
+
+        assertThat(blocked).hasStatus(429);
+        assertThat(blocked).bodyJson().extractingPath("$.detail").asString().startsWith("Muitas tentativas");
+        assertThat(login("carlos@maineri.com.br", "senha-forte-123")).hasStatusOk();
+    }
+
+    @Test
+    void passwordsBeyondTheBcryptLimitAreRejected() {
+        assertThat(login("carlos@maineri.com.br", "a".repeat(100))).hasStatus(400);
+        assertThatThrownBy(() -> accounts.createUser("Longa", "longa@maineri.com.br", "ç".repeat(37)))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void anonymousRequestsDoNotOpenASession() {
+        MvcTestResult result = mvc.get().uri("/api/customers").exchange();
+
+        assertThat(result).hasStatus(401);
+        assertThat(result.getMvcResult().getRequest().getSession(false)).isNull();
+    }
+
     private MvcTestResult login(String email, String password) {
         return mvc.post().uri("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
                 .content("{\"email\":\"%s\",\"password\":\"%s\"}".formatted(email, password))
