@@ -35,7 +35,8 @@ logging:
     org.springframework.modulith: INFO
 
 server:
-  port: 8080
+  # O Render informa a porta em PORT.
+  port: ${PORT:8080}
   servlet:
     session:
       timeout: 8h
