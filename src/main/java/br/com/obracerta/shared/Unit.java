@@ -29,4 +29,12 @@ public enum Unit {
     public String getSymbol() {
         return symbol;
     }
+
+    /** Só se compra inteiro: 2,3 sacos viram 3. Metro, m², litro e kg podem ser fracionados. */
+    public boolean soldWhole() {
+        return switch (this) {
+            case PIECE, POINT, BAG, CAN, ROLL, BAR, BOX, PACKAGE -> true;
+            default -> false;
+        };
+    }
 }

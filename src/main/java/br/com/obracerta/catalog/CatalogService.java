@@ -106,6 +106,11 @@ public class CatalogService {
 
     private void applyMaterial(Material material, MaterialRequest request) {
         material.rename(request.name().trim(), request.unit(), blankToNull(request.supplier()));
+        String packageName = blankToNull(request.packageName());
+        if ((packageName == null) != (request.packageSize() == null)) {
+            throw new IllegalArgumentException("Informe a embalagem e o quanto ela contém, ou deixe os dois em branco.");
+        }
+        material.changePackage(packageName, request.packageSize());
         LocalDate today = LocalDate.now();
         if (material.changePrice(request.price(), today)) {
             prices.save(new MaterialPrice(material.getId(), request.price(), today));

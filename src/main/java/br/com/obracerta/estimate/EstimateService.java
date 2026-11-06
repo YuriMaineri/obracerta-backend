@@ -10,6 +10,7 @@ import br.com.obracerta.customers.CustomerService;
 import br.com.obracerta.estimate.internal.EstimateRepository;
 import br.com.obracerta.pricing.PriceCalculator;
 import br.com.obracerta.pricing.PricingService;
+import br.com.obracerta.pricing.Purchase;
 import br.com.obracerta.pricing.Rates;
 import br.com.obracerta.shared.Difficulty;
 import br.com.obracerta.shared.MaterialSupply;
@@ -174,7 +175,8 @@ public class EstimateService {
             var quote = PriceCalculator.item(rates, quantity, service.daysPerUnit(), service.materialCostPerUnit(),
                     difficulty, chargeMaterial);
             quotes.add(quote);
-            entries.add(new ServiceEntry(description, note, service.id(), service.pricingMode(), quantity, difficulty, quote));
+            entries.add(new ServiceEntry(description, note, service.id(), service.pricingMode(), quantity, difficulty,
+                    quote, materialUses(service, quantity)));
         }
         estimate.replaceServices(entries);
         if (quotes.isEmpty()) {
@@ -183,6 +185,32 @@ public class EstimateService {
             var total = PriceCalculator.total(rates, quotes, chargeMaterial);
             estimate.updateSuggestion(total.total(), total.laborDays());
         }
+    }
+
+    private static List<EstimateDetails.MaterialUse> materialUses(ServiceDetails service, BigDecimal quantity) {
+        return service.composition().stream().map(line -> {
+            var use = PriceCalculator.material(quantity, line.quantityPerUnit(), line.wastePercent(), line.costPerUnit());
+            return new EstimateDetails.MaterialUse(line.materialId(), line.materialName(), line.materialUnit(),
+                    line.packageName(), line.packageSize(), line.quantityPerUnit(), line.wastePercent(),
+                    use.quantity(), line.materialPrice(), use.cost());
+        }).toList();
+    }
+
+    /** Soma o mesmo insumo em todos os serviços e arredonda para embalagem fechada. */
+    static List<EstimateDetails.ShoppingItem> shoppingList(List<EstimateDetails.Service> services) {
+        Map<Long, List<EstimateDetails.MaterialUse>> byMaterial = services.stream()
+                .flatMap(s -> s.materials().stream())
+                .collect(Collectors.groupingBy(EstimateDetails.MaterialUse::materialId, LinkedHashMap::new, Collectors.toList()));
+        return byMaterial.values().stream().map(uses -> {
+            var first = uses.getFirst();
+            BigDecimal needed = uses.stream().map(EstimateDetails.MaterialUse::quantity).reduce(BigDecimal.ZERO, BigDecimal::add);
+            BigDecimal cost = uses.stream().anyMatch(u -> u.cost() == null) ? null
+                    : uses.stream().map(EstimateDetails.MaterialUse::cost).reduce(BigDecimal.ZERO, BigDecimal::add);
+            Purchase purchase = Purchase.of(first.unit(), first.packageSize(), needed, first.unitPrice());
+            return new EstimateDetails.ShoppingItem(first.materialId(), first.material(), first.unit(),
+                    first.packageName(), first.packageSize(), needed.stripTrailingZeros(), purchase.packages(),
+                    purchase.bought(), purchase.leftover(), first.unitPrice(), cost, purchase.cost());
+        }).toList();
     }
 
     private void validateClauses(Set<Long> clauseIds) {
@@ -218,16 +246,18 @@ public class EstimateService {
         Customer c = customers.findById(e.getCustomerId());
         var customer = new EstimateDetails.CustomerSummary(c.getId(), c.getName(), c.getPersonType().name(),
                 c.getTaxId(), c.getContactPerson(), c.getAddress(), c.getDistrict(), c.getCity(), c.getPostalCode());
+        var services = e.services().stream().map(s -> new EstimateDetails.Service(s.getDescription(),
+                s.getInternalNote(), s.getServiceId(), s.getQuantity(), s.getDifficulty(), s.getSuggestedPrice(),
+                s.getLaborDays(), s.getLaborCost(), s.getMaterialCost(), s.materialUses())).toList();
         return new EstimateDetails(e.getId(), e.getNumber(), e.getStatus(), customer, e.getTitle(), e.getIssueDate(),
                 e.getValidityDays(), e.getMinLeadDays(), e.getMaxLeadDays(), e.getMaterialSupply(),
                 e.getEstimatedMaterialCost(), e.getPaymentTerms(), e.getBankAccountId(), Set.copyOf(e.getClauseIds()),
-                e.services().stream().map(s -> new EstimateDetails.Service(s.getDescription(), s.getInternalNote(),
-                        s.getServiceId(), s.getQuantity(), s.getDifficulty(), s.getSuggestedPrice())).toList(),
+                services,
                 e.getMaterials().stream().map(m -> new EstimateDetails.Material(m.getDescription(), m.getQuantity(), m.getTotalPrice())).toList(),
                 e.getPriceLines().stream().map(p -> new EstimateDetails.Price(p.getDescription(), p.getAmount(), p.isAlternative())).toList(),
                 e.getExclusions().stream().map(Exclusion::getContent).toList(),
                 e.getInternalNotes().stream().map(InternalNote::getContent).toList(),
-                e.getSuggestedTotal(), e.getSuggestedDays(),
+                e.getSuggestedTotal(), e.getSuggestedDays(), shoppingList(services),
                 e.getUpdatedAt());
     }
 

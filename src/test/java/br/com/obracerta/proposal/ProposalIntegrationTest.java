@@ -1,12 +1,14 @@
 package br.com.obracerta.proposal;
 
 import br.com.obracerta.TestcontainersConfiguration;
+import br.com.obracerta.catalog.CatalogService;
 import br.com.obracerta.customers.Customer;
 import br.com.obracerta.customers.CustomerRequest;
 import br.com.obracerta.customers.CustomerService;
 import br.com.obracerta.estimate.EstimateDetails;
 import br.com.obracerta.estimate.EstimateRequest;
 import br.com.obracerta.estimate.EstimateService;
+import br.com.obracerta.shared.Difficulty;
 import br.com.obracerta.shared.MaterialSupply;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -19,8 +21,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.lang.reflect.RecordComponent;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,6 +42,9 @@ class ProposalIntegrationTest {
 
     @Autowired
     CustomerService customers;
+
+    @Autowired
+    CatalogService catalog;
 
     EstimateDetails cartorio;
 
@@ -103,6 +110,36 @@ class ProposalIntegrationTest {
         assertThat(text).contains("R$ 33.500,00").contains("Sem a pintura das grades").contains("R$ 31.000,00")
                 .doesNotContain("R$ 64.500,00");
         assertThat(text.replaceAll("\\s", "")).contains("ALTERNATIVAS(NÃOSOMADASAOTOTAL)");
+    }
+
+    /** US046: o PDF do cliente não pode ter preço sugerido, custos, margem nem a memória de cálculo. */
+    @Test
+    void costsAndMarginNeverReachTheCustomer() throws IOException {
+        Long wallPainting = catalog.listServices("Pintura de parede interna", null).getFirst().id();
+        EstimateDetails linked = estimates.create(new EstimateRequest(cartorio.customer().id(), null,
+                LocalDate.of(2026, 10, 30), null, null, null, MaterialSupply.ITEMIZED, null, null, null, null,
+                List.of(new EstimateRequest.ServiceLine("Pintura do corredor social", null, wallPainting,
+                        new BigDecimal("30"), Difficulty.HARD)),
+                List.of(),
+                List.of(new EstimateRequest.PriceLine("Valor da mão de obra e material", new BigDecimal("850.00"))),
+                List.of(), List.of()));
+        assertThat(linked.suggestedTotal()).isEqualByComparingTo("761.99");
+
+        String text = extractText(proposals.generate(linked.id()).content());
+
+        assertThat(text).contains("Pintura do corredor social").contains("R$ 850,00")
+                .doesNotContain("761,99")      // sugerido
+                .doesNotContain("468,56")      // mão de obra
+                .doesNotContain("133,80")      // material calculado
+                .doesNotContain("120,90")      // custo da tinta na memória
+                .doesNotContain("Tinta acrílica fosca")
+                .doesNotContain("galão")
+                .doesNotContainIgnoringCase("sugerido")
+                .doesNotContainIgnoringCase("margem")
+                .doesNotContainIgnoringCase("custo indireto")
+                .doesNotContainIgnoringCase("diária");
+        assertThat(Arrays.stream(ProposalView.class.getRecordComponents()).map(RecordComponent::getName))
+                .noneMatch(name -> name.matches("(?i).*(suggest|margin|indirect|labor|cost|internal|shopping).*"));
     }
 
     @Test

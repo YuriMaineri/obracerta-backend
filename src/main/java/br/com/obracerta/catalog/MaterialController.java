@@ -54,11 +54,11 @@ class MaterialController {
     }
 
     record MaterialResponse(Long id, String name, Unit unit, BigDecimal price, String supplier,
-                            LocalDate updatedOn, List<String> usedBy) {
+                            String packageName, BigDecimal packageSize, LocalDate updatedOn, List<String> usedBy) {
 
         static MaterialResponse from(Material m, List<String> usedBy) {
             return new MaterialResponse(m.getId(), m.getName(), m.getUnit(), m.getPrice(), m.getSupplier(),
-                    m.getUpdatedOn(), usedBy);
+                    m.getPackageName(), m.getPackageSize(), m.getUpdatedOn(), usedBy);
         }
     }
 

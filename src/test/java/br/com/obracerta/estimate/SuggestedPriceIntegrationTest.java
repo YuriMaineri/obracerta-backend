@@ -65,6 +65,45 @@ class SuggestedPriceIntegrationTest {
     }
 
     @Test
+    void savesTheCalculationMemoryAndTheShoppingList() {
+        EstimateDetails saved = estimates.create(request(MaterialSupply.ITEMIZED, List.of(
+                new EstimateRequest.ServiceLine("Pintura do corredor", null, wallPainting, new BigDecimal("30"), Difficulty.HARD),
+                new EstimateRequest.ServiceLine("Pintura do lavabo", null, wallPainting, new BigDecimal("12"), null),
+                new EstimateRequest.ServiceLine("Reboco das trincas", null))));
+
+        EstimateDetails.Service corridor = saved.services().getFirst();
+        assertThat(corridor.laborDays()).isEqualByComparingTo("1.339");
+        assertThat(corridor.laborCost()).isEqualByComparingTo("468.56");
+        assertThat(corridor.materialCost()).isEqualByComparingTo("133.80");
+        assertThat(corridor.materials()).extracting(EstimateDetails.MaterialUse::material)
+                .containsExactly("Tinta acrílica fosca", "Lixa (folha)", "Fita crepe");
+        EstimateDetails.MaterialUse paint = corridor.materials().getFirst();
+        assertThat(paint.quantity()).isEqualByComparingTo("5.04");
+        assertThat(paint.wastePercent()).isEqualByComparingTo("5");
+        assertThat(paint.unitPrice()).isEqualByComparingTo("24.00");
+        assertThat(paint.cost()).isEqualByComparingTo("120.90");
+        assertThat(corridor.materials().stream().map(EstimateDetails.MaterialUse::cost).reduce(BigDecimal.ZERO, BigDecimal::add))
+                .isEqualByComparingTo(corridor.materialCost());
+        assertThat(saved.services().get(2).materials()).isEmpty();
+
+        // 5,04 L + 2,016 L = 7,056 L de tinta → 2 galões de 3,6 L; 3 + 1,2 folhas de lixa → 5
+        assertThat(saved.shoppingList()).extracting(EstimateDetails.ShoppingItem::material)
+                .containsExactly("Tinta acrílica fosca", "Lixa (folha)", "Fita crepe");
+        EstimateDetails.ShoppingItem paintToBuy = saved.shoppingList().getFirst();
+        assertThat(paintToBuy.needed()).isEqualByComparingTo("7.056");
+        assertThat(paintToBuy.packageName()).isEqualTo("galão");
+        assertThat(paintToBuy.packages()).isEqualByComparingTo("2");
+        assertThat(paintToBuy.leftover()).isEqualByComparingTo("0.144");
+        assertThat(paintToBuy.cost()).isEqualByComparingTo("169.26");
+        assertThat(paintToBuy.purchaseCost()).isEqualByComparingTo("172.80");
+        assertThat(saved.shoppingList().get(1).packages()).isEqualByComparingTo("5");
+
+        EstimateDetails reloaded = estimates.findById(saved.id());
+        assertThat(reloaded.services().getFirst().materials()).hasSize(3);
+        assertThat(reloaded.shoppingList()).hasSize(3);
+    }
+
+    @Test
     void duplicateKeepsTheCatalogLink() {
         EstimateDetails saved = estimates.create(request(MaterialSupply.CUSTOMER_SUPPLIED, List.of(
                 new EstimateRequest.ServiceLine("Pintura do corredor", null, wallPainting, new BigDecimal("30"), null))));

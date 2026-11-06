@@ -23,6 +23,19 @@ public final class PriceCalculator {
                         BigDecimal indirectCost, BigDecimal margin, BigDecimal total) {
     }
 
+    public record MaterialUse(BigDecimal quantity, BigDecimal cost) {
+    }
+
+    /**
+     * Um insumo dentro de um item: consumo = quantidade × consumo por unidade × (1 + perda). O custo usa o custo por
+     * unidade da composição, o mesmo que forma o material do item. Custo nulo = insumo sem preço.
+     */
+    public static MaterialUse material(BigDecimal quantity, BigDecimal quantityPerUnit, BigDecimal wastePercent,
+                                       BigDecimal costPerUnit) {
+        BigDecimal used = quantity.multiply(quantityPerUnit).multiply(markup(wastePercent)).setScale(4, RoundingMode.HALF_UP);
+        return new MaterialUse(used, costPerUnit == null ? null : money(quantity.multiply(costPerUnit)));
+    }
+
     /** Material do cliente ou comprado por nota não entra no preço. */
     public static boolean chargesMaterial(MaterialSupply supply) {
         return supply == MaterialSupply.ITEMIZED || supply == MaterialSupply.ESTIMATED;

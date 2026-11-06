@@ -38,8 +38,8 @@ class CatalogIntegrationTest {
 
     @Test
     void serviceCostComesFromCompositionAndUnitDefinesPricingMode() {
-        Material cable = catalog.createMaterial(new MaterialRequest("Cabo PP 3 x 2,5 mm²", Unit.METER, new BigDecimal("8.00"), null));
-        Material box = catalog.createMaterial(new MaterialRequest("Caixa de passagem", Unit.PIECE, null, null));
+        Material cable = catalog.createMaterial(new MaterialRequest("Cabo PP 3 x 2,5 mm²", Unit.METER, new BigDecimal("8.00"), null, null, null));
+        Material box = catalog.createMaterial(new MaterialRequest("Caixa de passagem", Unit.PIECE, null, null, null, null));
 
         ServiceDetails created = catalog.createService(new ServiceRequest("Extensão de tomada externa",
                 ServiceCategory.ELECTRICAL, Unit.POINT, null, new BigDecimal("0.33333"), null, List.of(
@@ -56,8 +56,8 @@ class CatalogIntegrationTest {
 
     @Test
     void compositionCanBeReorderedAndChangedInPlace() {
-        Material a = catalog.createMaterial(new MaterialRequest("Insumo A", Unit.KILOGRAM, BigDecimal.TEN, null));
-        Material b = catalog.createMaterial(new MaterialRequest("Insumo B", Unit.LITER, BigDecimal.ONE, null));
+        Material a = catalog.createMaterial(new MaterialRequest("Insumo A", Unit.KILOGRAM, BigDecimal.TEN, null, null, null));
+        Material b = catalog.createMaterial(new MaterialRequest("Insumo B", Unit.LITER, BigDecimal.ONE, null, null, null));
         ServiceDetails s = catalog.createService(new ServiceRequest("Serviço teste", ServiceCategory.OTHER,
                 Unit.SQUARE_METER, null, null, null, List.of(
                         new ServiceRequest.CompositionLine(a.getId(), BigDecimal.ONE, null),
@@ -73,7 +73,7 @@ class CatalogIntegrationTest {
 
     @Test
     void repeatedMaterialAndLaborUnitsAreRejected() {
-        Material a = catalog.createMaterial(new MaterialRequest("Insumo repetido", Unit.PIECE, BigDecimal.ONE, null));
+        Material a = catalog.createMaterial(new MaterialRequest("Insumo repetido", Unit.PIECE, BigDecimal.ONE, null, null, null));
         var line = new ServiceRequest.CompositionLine(a.getId(), BigDecimal.ONE, null);
 
         assertThatThrownBy(() -> catalog.createService(new ServiceRequest("Duplicado", ServiceCategory.OTHER,
@@ -86,14 +86,30 @@ class CatalogIntegrationTest {
 
     @Test
     void priceChangesAreKeptInHistory() {
-        Material paint = catalog.createMaterial(new MaterialRequest("Tinta teste", Unit.LITER, new BigDecimal("20.00"), null));
+        Material paint = catalog.createMaterial(new MaterialRequest("Tinta teste", Unit.LITER, new BigDecimal("20.00"), null, null, null));
 
-        catalog.updateMaterial(paint.getId(), new MaterialRequest("Tinta teste", Unit.LITER, new BigDecimal("20.00"), "Loja X"));
-        catalog.updateMaterial(paint.getId(), new MaterialRequest("Tinta teste", Unit.LITER, new BigDecimal("23.50"), "Loja X"));
+        catalog.updateMaterial(paint.getId(), new MaterialRequest("Tinta teste", Unit.LITER, new BigDecimal("20.00"), "Loja X", null, null));
+        catalog.updateMaterial(paint.getId(), new MaterialRequest("Tinta teste", Unit.LITER, new BigDecimal("23.50"), "Loja X", null, null));
 
         assertThat(catalog.priceHistory(paint.getId())).extracting(MaterialPrice::getPrice)
                 .usingElementComparator(BigDecimal::compareTo)
                 .containsExactly(new BigDecimal("23.50"), new BigDecimal("20.00"));
+    }
+
+    @Test
+    void packageIsOptionalButComplete() {
+        Material paint = catalog.listMaterials("Tinta acrílica fosca").getFirst();
+        assertThat(paint.getPackageName()).isEqualTo("galão");
+        assertThat(paint.getPackageSize()).isEqualByComparingTo("3.6");
+        assertThat(catalog.findService(catalog.listServices("Pintura de parede interna", null).getFirst().id())
+                .composition().getFirst().packageSize()).isEqualByComparingTo("3.6");
+
+        Material bucket = catalog.createMaterial(new MaterialRequest("Massa teste", Unit.KILOGRAM, BigDecimal.ONE, null, "balde", new BigDecimal("25")));
+        assertThat(bucket.getPackageSize()).isEqualByComparingTo("25");
+
+        assertThatThrownBy(() -> catalog.createMaterial(new MaterialRequest("Sem tamanho", Unit.LITER, BigDecimal.ONE, null, "galão", null)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("embalagem");
     }
 
     @Test

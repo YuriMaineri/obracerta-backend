@@ -28,6 +28,12 @@ public class Material {
     @Column(length = 150)
     private String supplier;
 
+    @Column(length = 30)
+    private String packageName;
+
+    @Column(precision = 10, scale = 3)
+    private BigDecimal packageSize;
+
     private LocalDate updatedOn;
 
     @Column(nullable = false)
@@ -45,6 +51,12 @@ public class Material {
         this.name = name;
         this.unit = unit;
         this.supplier = supplier;
+    }
+
+    /** Embalagem em que é vendido ("galão" de 3,6 L); os dois nulos = sem embalagem. */
+    void changePackage(String packageName, BigDecimal packageSize) {
+        this.packageName = packageName;
+        this.packageSize = packageSize;
     }
 
     /** Devolve true quando o preço mudou, para o histórico registrar o valor novo. */
@@ -66,6 +78,8 @@ public class Material {
     public Unit getUnit() { return unit; }
     public BigDecimal getPrice() { return price; }
     public String getSupplier() { return supplier; }
+    public String getPackageName() { return packageName; }
+    public BigDecimal getPackageSize() { return packageSize; }
     public LocalDate getUpdatedOn() { return updatedOn; }
     public boolean isActive() { return active; }
 }

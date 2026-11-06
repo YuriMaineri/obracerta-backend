@@ -5,6 +5,8 @@ import br.com.obracerta.shared.PricingMode;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 /** Linha de "SERVIÇO A SER EXECUTADO". Ligada ao catálogo, guarda o cálculo do momento em que foi salva. */
 @Entity
@@ -53,6 +55,10 @@ class EstimateItem {
     @Column(name = "total_price", precision = 12, scale = 2)
     private BigDecimal suggestedPrice;
 
+    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("sortOrder")
+    private List<EstimateItemMaterial> materials = new ArrayList<>();
+
     protected EstimateItem() {
     }
 
@@ -70,6 +76,9 @@ class EstimateItem {
             this.laborCost = entry.quote().laborCost();
             this.materialCost = entry.quote().materialCost();
             this.suggestedPrice = entry.quote().price();
+            for (int i = 0; i < entry.materials().size(); i++) {
+                materials.add(new EstimateItemMaterial(this, entry.materials().get(i), i));
+            }
         }
     }
 
@@ -79,4 +88,11 @@ class EstimateItem {
     BigDecimal getQuantity() { return quantity; }
     Difficulty getDifficulty() { return difficulty; }
     BigDecimal getSuggestedPrice() { return suggestedPrice; }
+    BigDecimal getLaborDays() { return laborDays; }
+    BigDecimal getLaborCost() { return laborCost; }
+    BigDecimal getMaterialCost() { return materialCost; }
+
+    List<EstimateDetails.MaterialUse> materialUses() {
+        return materials.stream().map(EstimateItemMaterial::toUse).toList();
+    }
 }

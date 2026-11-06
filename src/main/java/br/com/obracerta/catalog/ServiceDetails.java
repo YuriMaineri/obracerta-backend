@@ -24,6 +24,7 @@ public record ServiceDetails(
 
     /** costPerUnit = consumo × (1 + perda) × preço do insumo. Nulo quando o insumo está sem preço. */
     public record Line(Long materialId, String materialName, Unit materialUnit, BigDecimal materialPrice,
+                       String packageName, BigDecimal packageSize,
                        BigDecimal quantityPerUnit, BigDecimal wastePercent, BigDecimal costPerUnit) {
     }
 
@@ -46,7 +47,8 @@ public record ServiceDetails(
 
     private static Line line(ServiceMaterial c) {
         Material m = c.getMaterial();
-        return new Line(m.getId(), m.getName(), m.getUnit(), m.getPrice(), c.getQuantityPerUnit(),
+        return new Line(m.getId(), m.getName(), m.getUnit(), m.getPrice(), m.getPackageName(), m.getPackageSize(),
+                c.getQuantityPerUnit(),
                 c.getWastePercent(), lineCost(c.getQuantityPerUnit(), c.getWastePercent(), m.getPrice()));
     }
 }
