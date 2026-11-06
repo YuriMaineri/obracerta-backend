@@ -20,12 +20,15 @@ class EstimateMaterial {
     @Column(nullable = false, length = 200)
     private String description;
 
+    private Long materialId;
+
     @Column(precision = 12, scale = 3)
     private BigDecimal quantity;
 
     @Column(precision = 12, scale = 2)
     private BigDecimal totalPrice;
 
+    /** CALCULATED quando veio da lista de compra dos serviços; MANUAL quando digitada. */
     @Column(nullable = false, length = 20)
     private String source = "MANUAL";
 
@@ -35,15 +38,19 @@ class EstimateMaterial {
     protected EstimateMaterial() {
     }
 
-    EstimateMaterial(Estimate estimate, String description, BigDecimal quantity, BigDecimal totalPrice, int sortOrder) {
+    EstimateMaterial(Estimate estimate, String description, BigDecimal quantity, BigDecimal totalPrice, Long materialId,
+                     int sortOrder) {
         this.estimate = estimate;
         this.description = description;
         this.quantity = quantity;
         this.totalPrice = totalPrice;
+        this.materialId = materialId;
+        this.source = materialId == null ? "MANUAL" : "CALCULATED";
         this.sortOrder = sortOrder;
     }
 
     String getDescription() { return description; }
     BigDecimal getQuantity() { return quantity; }
     BigDecimal getTotalPrice() { return totalPrice; }
+    Long getMaterialId() { return materialId; }
 }

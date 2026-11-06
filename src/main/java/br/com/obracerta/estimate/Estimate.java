@@ -133,7 +133,7 @@ public class Estimate {
         materials.clear();
         for (int i = 0; i < lines.size(); i++) {
             var line = lines.get(i);
-            materials.add(new EstimateMaterial(this, line.description().trim(), line.quantity(), line.totalPrice(), i));
+            materials.add(new EstimateMaterial(this, line.description().trim(), line.quantity(), line.totalPrice(), line.materialId(), i));
         }
     }
 

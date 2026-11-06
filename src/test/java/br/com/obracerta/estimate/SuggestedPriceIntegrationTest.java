@@ -104,6 +104,26 @@ class SuggestedPriceIntegrationTest {
     }
 
     @Test
+    void materialsBroughtFromTheServicesKeepTheirLink() {
+        EstimateDetails saved = estimates.create(request(MaterialSupply.ITEMIZED, List.of(
+                new EstimateRequest.ServiceLine("Pintura do corredor", null, wallPainting, new BigDecimal("30"), null))));
+        Long paint = saved.shoppingList().getFirst().materialId();
+        EstimateRequest withMaterials = new EstimateRequest(customerId, null, LocalDate.of(2026, 10, 14), null, null, null,
+                MaterialSupply.ITEMIZED, null, null, null, null,
+                List.of(new EstimateRequest.ServiceLine("Pintura do corredor", null, wallPainting, new BigDecimal("30"), null)),
+                List.of(new EstimateRequest.MaterialLine("Tinta acrílica fosca — 2 galões de 3,6 L", new BigDecimal("2"),
+                                new BigDecimal("218.59"), paint),
+                        new EstimateRequest.MaterialLine("Fita crepe extra", null, null)),
+                List.of(), List.of(), List.of());
+
+        EstimateDetails updated = estimates.update(saved.id(), withMaterials);
+        EstimateDetails copy = estimates.duplicate(saved.id());
+
+        assertThat(updated.materials()).extracting(EstimateDetails.Material::materialId).containsExactly(paint, null);
+        assertThat(copy.materials()).extracting(EstimateDetails.Material::materialId).containsExactly(paint, null);
+    }
+
+    @Test
     void duplicateKeepsTheCatalogLink() {
         EstimateDetails saved = estimates.create(request(MaterialSupply.CUSTOMER_SUPPLIED, List.of(
                 new EstimateRequest.ServiceLine("Pintura do corredor", null, wallPainting, new BigDecimal("30"), null))));

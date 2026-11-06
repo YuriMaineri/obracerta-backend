@@ -64,7 +64,8 @@ public record EstimateDetails(
                                BigDecimal unitPrice, BigDecimal cost, BigDecimal purchaseCost) {
     }
 
-    public record Material(String description, BigDecimal quantity, BigDecimal totalPrice) {
+    /** materialId preenchido = linha trazida da lista de compra dos serviços; nulo = digitada à mão. */
+    public record Material(String description, BigDecimal quantity, BigDecimal totalPrice, Long materialId) {
     }
 
     public record Price(String description, BigDecimal amount, boolean alternative) {

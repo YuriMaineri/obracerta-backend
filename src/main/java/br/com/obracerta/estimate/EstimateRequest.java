@@ -68,7 +68,12 @@ public record EstimateRequest(
             @NotBlank(message = "Descricao do material e obrigatoria")
             @Size(max = 200, message = "Material com no maximo 200 caracteres") String description,
             @PositiveOrZero(message = "Quantidade nao pode ser negativa") BigDecimal quantity,
-            @PositiveOrZero(message = "Preco do material nao pode ser negativo") BigDecimal totalPrice) {
+            @PositiveOrZero(message = "Preco do material nao pode ser negativo") BigDecimal totalPrice,
+            Long materialId) {
+
+        public MaterialLine(String description, BigDecimal quantity, BigDecimal totalPrice) {
+            this(description, quantity, totalPrice, null);
+        }
     }
 
     public record PriceLine(

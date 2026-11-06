@@ -104,7 +104,7 @@ public class EstimateService {
                 d.bankAccountId(), d.clauseIds(),
                 d.services().stream().map(s -> new EstimateRequest.ServiceLine(s.description(), s.internalNote(),
                         s.serviceId(), s.quantity(), s.difficulty())).toList(),
-                d.materials().stream().map(m -> new EstimateRequest.MaterialLine(m.description(), m.quantity(), m.totalPrice())).toList(),
+                d.materials().stream().map(m -> new EstimateRequest.MaterialLine(m.description(), m.quantity(), m.totalPrice(), m.materialId())).toList(),
                 d.priceLines().stream().map(p -> new EstimateRequest.PriceLine(p.description(), p.amount(), p.alternative())).toList(),
                 d.exclusions(), d.internalNotes());
         Set<Long> activeClauses = company.listClauses().stream().map(Clause::getId).collect(Collectors.toSet());
@@ -253,7 +253,7 @@ public class EstimateService {
                 e.getValidityDays(), e.getMinLeadDays(), e.getMaxLeadDays(), e.getMaterialSupply(),
                 e.getEstimatedMaterialCost(), e.getPaymentTerms(), e.getBankAccountId(), Set.copyOf(e.getClauseIds()),
                 services,
-                e.getMaterials().stream().map(m -> new EstimateDetails.Material(m.getDescription(), m.getQuantity(), m.getTotalPrice())).toList(),
+                e.getMaterials().stream().map(m -> new EstimateDetails.Material(m.getDescription(), m.getQuantity(), m.getTotalPrice(), m.getMaterialId())).toList(),
                 e.getPriceLines().stream().map(p -> new EstimateDetails.Price(p.getDescription(), p.getAmount(), p.isAlternative())).toList(),
                 e.getExclusions().stream().map(Exclusion::getContent).toList(),
                 e.getInternalNotes().stream().map(InternalNote::getContent).toList(),
